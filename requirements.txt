@@ -1,0 +1,3 @@
+requests
+Flask
+python-memcached

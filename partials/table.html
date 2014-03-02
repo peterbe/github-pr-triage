@@ -1,0 +1,48 @@
+<div>
+    <div id="error" ng-class="{hidden: !general_error}">
+       <h3>Error :(</h3>
+       <p>
+         {{ general_error }}
+       </p>
+    </div>
+
+    <div id="cloak" ng-class="{hidden: !loading}">
+       <p>
+       Loading loading loading...<span class="dots"></span>
+       </p>
+    </div>
+
+    <table class="table table-condensed table-bordered"
+      ng-class="{hidden: !pulls.length}">
+     <thead>
+     <tr>
+         <th>Bug</th>
+         <th>Title</th>
+         <th>Last Updated</th>
+         <th>People</th>
+     </tr>
+     </thead>
+     <tbody>
+         <tr ng-repeat="pull in pulls | orderBy:updated_at:true">
+             <td>
+                 <a ng-repeat="bug in pull._bugs" href="https://bugzilla.mozilla.org/show_bug.cgi?id={{ bug }}" target="_blank"
+                  title="{{ makeBugTitle(bug) }}" ng-class="{closed: isClosed(bug)}">{{ bug }}</a>
+             </td>
+             <td><a href="{{ pull.html_url }}" target="_blank">{{ pull.title }}</a></td>
+             <td><time title="{{ formatDate(pull.updated_at) }}" am-time-ago="pull.updated_at"></time>
+             </td>
+             <td>
+                 <a ng-repeat="user in uniqueUsers(pull)"
+                    href="{{ user.html_url }}" target="_blank" title="{{ user.login }}">
+                     <img class="avatar" src="{{ user.avatar_url}}" alt="{{ user.login }}">
+                 </a>
+<!--                  <span ng-repeat="comment in pull._comments">
+                     <a href="{{ comment.user.html_url }}" target="_blank" title="{{ comment.user.login }}">
+                         <img class="avatar" src="{{ comment.user.avatar_url}}" alt="{{ comment.user.login }}">
+                     </a>
+                 </span> -->
+             </td>
+        </tr>
+     </tbody>
+    </table>
+</div>

@@ -1,0 +1,58 @@
+<!doctype html>
+<html ng-app="triage">
+<head>
+<meta charset="utf-8">
+<title>Github Pull Request Triage</title>
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.1/css/bootstrap.min.css">
+
+<style>
+.hidden { display: none; }
+#error {
+    display: none;
+    padding: 100px;
+    color: red;
+}
+td a { padding-right: 5px; }
+#cloak {
+   padding: 100px;
+   height: 100%;
+   width: 100%;
+}
+#cloak p { text-align:center; }
+a.resolved { text-decoration: line-through !important; }
+img.avatar {
+    border-radius: 4px;
+    width: 24px;
+    height: 24px;
+}
+</style>
+</head>
+<body>
+
+<div class="container" ng-controller="AppController">
+
+    <ng-view></ng-view>
+
+
+
+<hr>DEBUG:<br>
+owner:{{owner }}<br>
+repo:{{repo}}
+<!-- <footer style="margin-top:40px">
+  <p><a href="https://github.com/peterbe/whatsdeployed">github.com/peterbe/whatsdeployed</a></p>
+</footer> -->
+</div><!-- /.container -->
+
+<!-- <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.13/angular.min.js"></script> -->
+<script src="static/1.2.13/angular.min.js"></script>
+<script src="static/1.2.13/angular-route.min.js"></script>
+<script src="static/underscore-min.js"></script>
+<script src="static/moment.min.js"></script>
+<script src="static/angular-moment.min.js"></script>
+
+<!--<script src="//code.jquery.com/jquery-2.1.0.min.js"></script>-->
+
+<script src="static/app.js"></script>
+
+</body>
+</html>
