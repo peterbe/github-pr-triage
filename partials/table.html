@@ -12,6 +12,11 @@
        </p>
     </div>
 
+    <h5>
+        All <a href="https://github.com/{{ owner }}/{{ repo }}/pulls">open pull requests</a>
+        for <a href="https://github.com/{{ owner }}/{{ repo }}">github.com/{{ owner }}/{{ repo }}</a>
+    </h5>
+
     <table class="table table-condensed table-bordered"
       ng-class="{hidden: !pulls.length}">
      <thead>
@@ -20,29 +25,71 @@
          <th>Title</th>
          <th>Last Updated</th>
          <th>People</th>
+         <th>Last actor</th>
+         <th>State</th>
      </tr>
      </thead>
      <tbody>
-         <tr ng-repeat="pull in pulls | orderBy:updated_at:true">
+         <tr ng-repeat="pull in pulls | orderBy:'updated_at':true">
              <td>
                  <a ng-repeat="bug in pull._bugs" href="https://bugzilla.mozilla.org/show_bug.cgi?id={{ bug }}" target="_blank"
                   title="{{ makeBugTitle(bug) }}" ng-class="{closed: isClosed(bug)}">{{ bug }}</a>
              </td>
-             <td><a href="{{ pull.html_url }}" target="_blank">{{ pull.title }}</a></td>
+             <td>
+                 <img ng-src="{{ pull.user.avatar_url }}" class="avatar" alt="{{ pull.user.login }}">
+                 <a href="{{ pull.html_url }}" target="_blank">{{ pull.title }}</a>
+<!--                  <span class="count-comments">({{ countComments(pull) }} comments)</span>  -->
+                 <a href="" ng-click="toggleExpandPull(pull)">+</a>
+
+                 <table ng-class="{hidden: !pull._expanded}" class="expanded table table-condensed">
+                     <tr ng-repeat="event in pull._events | orderBy:'_date':false">
+                         <td>
+                             <span ng-if="event._type === 'commit'" title="commit added" class="octicon octicon-git-commit"></span>
+                             <span ng-if="event._type === 'comment'" title="comment posted" class="octicon octicon-comment"></span>
+                             <span ng-if="event._type === 'creation'" title="pull request created" class="octicon octicon-git-pull-request"></span>
+                             <span ng-if="event._type === 'status-success'" class="octicon octicon-check"></span>
+                             <span ng-if="event._type === 'status-failure'" class="octicon octicon-x"></span>
+                             <span ng-if="event._type === 'status-pending'" class="octicon octicon-hourglass"></span>
+                             <a href="{{ event._url }}">
+                                 {{ event._summary }}
+                             </a>
+                         </td>
+                         <td><time title="{{ formatDate(event._date) }}" am-time-ago="event._date"></time></td>
+                     </tr>
+                 </table>
+             </td>
              <td><time title="{{ formatDate(pull.updated_at) }}" am-time-ago="pull.updated_at"></time>
              </td>
              <td>
                  <a ng-repeat="user in uniqueUsers(pull)"
                     href="{{ user.html_url }}" target="_blank" title="{{ user.login }}">
-                     <img class="avatar" src="{{ user.avatar_url}}" alt="{{ user.login }}">
+                     <img class="avatar" ng-src="{{ user.avatar_url}}" alt="{{ user.login }}">
                  </a>
-<!--                  <span ng-repeat="comment in pull._comments">
-                     <a href="{{ comment.user.html_url }}" target="_blank" title="{{ comment.user.login }}">
-                         <img class="avatar" src="{{ comment.user.avatar_url}}" alt="{{ comment.user.login }}">
-                     </a>
-                 </span> -->
-             </td>
+            </td>
+            <td>
+                    <img ng-src="{{ pull._last_actor.user.avatar_url }}" class="avatar" alt="{{ pull._last_actor.user.avatar_url }}">
+                    <a href="{{ pull._last_actor.url }}" target="_blank">
+                        <span ng-if="pull._last_actor.type === 'commit'" title="commit added" class="octicon octicon-git-commit"></span>
+                        <span ng-if="pull._last_actor.type === 'comment'" title="comment posted" class="octicon octicon-comment"></span>
+                        <span ng-if="pull._last_actor.type === 'creation'" title="pull request created" class="octicon octicon-git-pull-request"></span>
+<!--                         ({{ pull._last_actor.type }}) -->
+                    </a>
+
+            </td>
+
+            <td>
+                 <span ng-if="isMergeable(pull)" title="Can be merged" class="good glyphicon glyphicon-ok"></span>
+                 <span ng-if="!isMergeable(pull)" title="We can’t automatically merge this pull request." class="bad glyphicon glyphicon-resize-full"></span>
+                 <span ng-if="hasStatuses(pull)">
+                     <span ng-if="isSuccessfulLastStatus(pull)" title="Last test succeeded" class="good glyphicon glyphicon-ok"></span>
+                     <span ng-if="!isSuccessfulLastStatus(pull)" title="Last test failed!" class="bad glyphicon glyphicon-remove"></span>
+                 </span>
+<!--                  <span ng-if="creatorHadLastWord()" title="The creator was the last to word on it" class="maybe glyphicon glyphicon-user"></span>
+                 <span ng-if="!creatorHadLastWord()" title="The reviewer (or someone else) had the last word on it" class="maybe glyphicon glyphicon-heart"></span> -->
+
+            </td>
         </tr>
      </tbody>
     </table>
+    <p><a href="/">Pick another project</a></p>
 </div>
