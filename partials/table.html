@@ -7,9 +7,10 @@
     </div>
 
     <div id="cloak" ng-class="{hidden: !loading}">
-       <p>
-       Loading loading loading...<span class="dots"></span>
-       </p>
+        <p><img src="/static/keep-calm.png" alt="Keep Calm and Eat a Cookie"><br>
+
+        <span class="blinking">Loading loading loading...<span class="dots"></span></span>
+        </p>
     </div>
 
     <h5>
@@ -38,8 +39,14 @@
              <td>
                  <img ng-src="{{ pull.user.avatar_url }}" class="avatar" alt="{{ pull.user.login }}">
                  <a href="{{ pull.html_url }}" target="_blank">{{ pull.title }}</a>
-<!--                  <span class="count-comments">({{ countComments(pull) }} comments)</span>  -->
-                 <a href="" ng-click="toggleExpandPull(pull)">+</a>
+
+                 <a href="" ng-click="toggleExpandPull(pull)">
+                    <span class="glyphicon glyphicon-plus" ng-if="!pull._expanded"
+                           style="font-size:70%"></span>
+                    <span class="glyphicon glyphicon-minus" ng-if="pull._expanded"
+                          style="font-size:70%"></span>
+
+                 </a>
 
                  <table ng-class="{hidden: !pull._expanded}" class="expanded table table-condensed">
                      <tr ng-repeat="event in pull._events | orderBy:'_date':false">
@@ -54,11 +61,11 @@
                                  {{ event._summary }}
                              </a>
                          </td>
-                         <td><time title="{{ formatDate(event._date) }}" am-time-ago="event._date"></time></td>
+                         <td><time am-time-ago="event._date"></time></td>
                      </tr>
                  </table>
              </td>
-             <td><time title="{{ formatDate(pull.updated_at) }}" am-time-ago="pull.updated_at"></time>
+             <td><time am-time-ago="pull.updated_at"></time>
              </td>
              <td>
                  <a ng-repeat="user in uniqueUsers(pull)"

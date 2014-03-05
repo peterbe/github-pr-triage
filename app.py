@@ -113,9 +113,9 @@ class BugzillaProxyView(ProxyView):
 @app.route('/<path:path>')
 def catch_all(path):
     path = path or 'index.html'
-    print "PATH", path
+    # print "PATH", path
     if not (os.path.isdir(path) or os.path.isfile(path)):
-        print "\tdidn't exist"
+        # print "\tdidn't exist"
         path = 'index.html'
     # return send_file('../dist/%s' % path)
     return send_file(path)

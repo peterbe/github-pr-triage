@@ -95,10 +95,6 @@ angular.module('triage', ['ngRoute', 'angularMoment'])
         return events;
     };
 
-    $scope.formatDate = function(date) {
-        return moment(date).format('ddd, MMM D, YYYY, h:mma UTCZZ');
-    };
-
     function findBugNumbers(title) {
         var re = /\b[0-9]{6,10}\b/;
         var bugs = [];
@@ -281,8 +277,12 @@ angular.module('triage', ['ngRoute', 'angularMoment'])
             });
         })
         .error(function(data, status) {
+        })
+        .finally(function() {
+            $scope.loading = false;
         });
     }
+    $scope.loading = true;
     loadPulls($scope.owner, $scope.repo);
 
 })
