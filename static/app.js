@@ -143,7 +143,7 @@ angular.module('triage', ['ngRoute', 'angularMoment'])
     };
 
     $scope.hasStatuses = function(pull) {
-        return !!pull._statuses;
+        return pull._statuses && pull._statuses.length;
     };
 
     $scope.isSuccessfulLastStatus = function(pull) {
