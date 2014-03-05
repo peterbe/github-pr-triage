@@ -1,15 +1,15 @@
 angular.module('triage', ['ngRoute', 'angularMoment'])
 
-.config(['$routeProvider', function ($routeProvider) {
-    // $locationProvider.html5Mode(true);
+.config(['$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider) {
+    $locationProvider.html5Mode(true);
 
     $routeProvider
     .when('/:owner/:repo', {
-        templateUrl: "partials/table.html",
+        templateUrl: "/partials/table.html",
         controller: 'PullsController'
     })
     .when('/', {
-        templateUrl: "partials/form.html",
+        templateUrl: "/partials/form.html",
         controller:'FormController'
     })
     ;

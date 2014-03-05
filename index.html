@@ -50,11 +50,11 @@ table.expanded td {
 
 @font-face{
   font-family:'octicons';
-  src:url("static/octicons.eot");
-  src:url("static/octicons.eot#iefix") format("embedded-opentype"),
-  url("static/octicons.woff") format("woff"),
-  url("static/octicons.ttf") format("truetype"),
-  url("static/octicons.svg#octicons") format("svg");
+  src:url("/static/octicons.eot");
+  src:url("/static/octicons.eot#iefix") format("embedded-opentype"),
+  url("/static/octicons.woff") format("woff"),
+  url("/static/octicons.ttf") format("truetype"),
+  url("/static/octicons.svg#octicons") format("svg");
   font-weight:normal;
   font-style:normal
 }
@@ -87,6 +87,7 @@ table.expanded td {
 
 <footer style="margin-top:40px">
   <p>This tool can be forked on <a href="https://github.com/peterbe/github-pr-triage">github.com/peterbe/github-pr-triage</a>
+
       <span ng-if="ratelimit().limit">
           &bull;
           <b>Rate limit:</b> <code>{{ ratelimit().limit }}</code>
@@ -97,16 +98,13 @@ table.expanded td {
 </footer>
 </div><!-- /.container -->
 
-<!-- <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.13/angular.min.js"></script> -->
-<script src="static/1.2.13/angular.min.js"></script>
-<script src="static/1.2.13/angular-route.min.js"></script>
-<script src="static/underscore-min.js"></script>
-<script src="static/moment.min.js"></script>
-<script src="static/angular-moment.min.js"></script>
+<script src="/static/1.2.14/angular.min.js"></script>
+<script src="/static/1.2.14/angular-route.min.js"></script>
+<script src="/static/underscore-min.js"></script>
+<script src="/static/moment.min.js"></script>
+<script src="/static/angular-moment.min.js"></script>
 
-<!--<script src="//code.jquery.com/jquery-2.1.0.min.js"></script>-->
-
-<script src="static/app.js"></script>
+<script src="/static/app.js"></script>
 
 </body>
 </html>
