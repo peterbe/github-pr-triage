@@ -142,10 +142,10 @@ angular.module('triage', ['ngRoute', 'angularMoment'])
         return pull._statuses && pull._statuses.length;
     };
 
-    $scope.isSuccessfulLastStatus = function(pull) {
+    $scope.isLastStatus = function(pull, state) {
         var statuses = pull._statuses || [];
         var last = statuses[0];  // confusing, I know
-        return last.state === 'success';
+        return last.state === state;
     };
 
     function loadComments(pull) {
