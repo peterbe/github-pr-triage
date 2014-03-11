@@ -163,6 +163,10 @@ angular.module('triage', ['ngRoute', 'angularMoment'])
         })
         .error(function(data, status) {
             console.warn(data, status);
+        })
+        .finally(function() {
+            nanobar_level += nanobar_increments;
+            nanobar.go(nanobar_level);
         });
     }
 
@@ -177,6 +181,10 @@ angular.module('triage', ['ngRoute', 'angularMoment'])
         })
         .error(function(data, status) {
             console.warn(data, status);
+        })
+        .finally(function() {
+            nanobar_level += nanobar_increments;
+            nanobar.go(nanobar_level);
         });
     }
 
@@ -197,6 +205,10 @@ angular.module('triage', ['ngRoute', 'angularMoment'])
         })
         .error(function(data, status) {
             console.warn(data, status);
+        })
+        .finally(function() {
+            nanobar_level += nanobar_increments;
+            nanobar.go(nanobar_level);
         });
     }
 
@@ -248,6 +260,8 @@ angular.module('triage', ['ngRoute', 'angularMoment'])
                 ratelimit.update(data._ratelimit_limit, data._ratelimit_remaining);
             }
             // console.dir($scope.ratelimit);
+            nanobar_increments = 50 / (data._data.length * 3);
+            var big_nanobar_increments = 50 / data._data.length;
             _.each(data._data, function(pull) {
                 pull._bugs = findBugNumbers(pull.title);
                 bugs = _.union(bugs, pull._bugs);
@@ -259,6 +273,9 @@ angular.module('triage', ['ngRoute', 'angularMoment'])
                 loadComments(pull);
                 loadStatuses(pull);
                 loadCommits(pull);
+
+                nanobar_level += big_nanobar_increments;
+                nanobar.go(nanobar_level);
             });
             $scope.pulls = pulls;
             // console.log('ALL BUGS', bugs);
@@ -282,6 +299,10 @@ angular.module('triage', ['ngRoute', 'angularMoment'])
             $scope.loading = false;
         });
     }
+    var nanobar = new Nanobar();
+    var nanobar_increments = null;
+    var nanobar_level = 0;
+
     $scope.loading = true;
     loadPulls($scope.owner, $scope.repo);
 
