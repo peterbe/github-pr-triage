@@ -25,6 +25,9 @@
          <th>Bug</th>
          <th>Title</th>
          <th>Last Updated</th>
+         <th ng-if="use_assigned">Assigned
+             <a href="?hide-assigned=1" ng-click="hideAssigned()" title="Click to remove this column">&times;</a>
+         </th>
          <th>People</th>
          <th>Last actor</th>
          <th>State</th>
@@ -67,6 +70,11 @@
              </td>
              <td><time am-time-ago="pull.updated_at"></time>
              </td>
+            <td ng-if="use_assigned">
+                 <a href="{{ pull.assignee.html_url }}" target="_blank" title="{{ pull.assignee.login }}">
+                    <img ng-src="{{ pull.assignee.avatar_url }}" class="avatar" alt="{{ pull.assignee.login }}">
+                 </a>
+            </td>
              <td>
                  <a ng-repeat="user in uniqueUsers(pull)"
                     href="{{ user.html_url }}" target="_blank" title="{{ user.login }}">

@@ -14,10 +14,11 @@ angular.module('triage.controllers', [])
     };
 })
 
-.controller('PullsController', function($scope, $http, $routeParams, ratelimit) {
+.controller('PullsController', function($scope, $http, $routeParams, $location, ratelimit) {
 
     $scope.owner = $routeParams.owner;
     $scope.repo = $routeParams.repo;
+    $scope.use_assigned = !$routeParams['hide-assigned'];
     $scope.bugs = {};
 
     $scope.toggleExpandPull = function(pull) {
@@ -33,6 +34,11 @@ angular.module('triage.controllers', [])
         }
         return s;
     }
+
+    $scope.hideAssigned = function() {
+        $location.search('hide-assigned', '1');
+        $scope.use_assigned = false;
+    };
 
     $scope.getEvents = function(pull) {
         var events = [];
