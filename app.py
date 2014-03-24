@@ -125,6 +125,8 @@ def index_html():
 
 @app.route('/<path:path>')
 def catch_all(path):
+    if path == 'favicon.ico':
+        path = 'static/favicon.ico'
     path = path or 'index.html'
     path = os.path.join('app', path)
     # print "PATH", path
