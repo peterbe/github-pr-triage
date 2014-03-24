@@ -17,7 +17,7 @@ GITHUB_OAUTH_TOKEN = os.environ.get('GITHUB_OAUTH_TOKEN')
 
 app = Flask(
     __name__,
-    static_folder='client/static'
+    static_folder='app/static'
 )
 cache = MemcachedCache(MEMCACHE_URL)
 
@@ -126,11 +126,11 @@ def index_html():
 @app.route('/<path:path>')
 def catch_all(path):
     path = path or 'index.html'
-    path = os.path.join('client', path)
+    path = os.path.join('app', path)
     # print "PATH", path
 
     if not (os.path.isdir(path) or os.path.isfile(path)):
-        path = os.path.join('client', 'index.html')
+        path = os.path.join('app', 'index.html')
     return send_file(path)
 
 
