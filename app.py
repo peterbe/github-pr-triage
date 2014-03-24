@@ -1,15 +1,13 @@
 #!/usr/bin/env python
 import json
-import time
 import os
-import urllib
 import hashlib
 
 import requests
 
 from werkzeug.contrib.cache import MemcachedCache
 
-from flask import Flask, request, make_response, abort, jsonify, send_file
+from flask import Flask, request, make_response, jsonify, send_file
 from flask.views import MethodView
 
 
@@ -17,12 +15,11 @@ MEMCACHE_URL = os.environ.get('MEMCACHE_URL', '127.0.0.1:11211').split(',')
 DEBUG = os.environ.get('DEBUG', False) in ('true', '1', 'y', 'yes')
 GITHUB_OAUTH_TOKEN = os.environ.get('GITHUB_OAUTH_TOKEN')
 
-app = Flask(__name__)
+app = Flask(
+    __name__,
+    static_folder='client/static'
+)
 cache = MemcachedCache(MEMCACHE_URL)
-
-@app.route('/')
-def index_html():
-    return send_file('index.html')
 
 
 class ProxyView(MethodView):
@@ -61,9 +58,17 @@ class ProxyView(MethodView):
                     response = requests.get(self.base + path, headers=headers)
                     if response.status_code == 304:
                         # it's still fresh!
-                        cache.set(short_key, json.dumps(value), self.short_expires)
-                        value['_ratelimit_limit'] = response.headers.get('X-RateLimit-Limit')
-                        value['_ratelimit_remaining'] = response.headers.get('X-RateLimit-Remaining')
+                        cache.set(
+                            short_key,
+                            json.dumps(value),
+                            self.short_expires
+                        )
+                        value['_ratelimit_limit'] = (
+                            response.headers.get('X-RateLimit-Limit')
+                        )
+                        value['_ratelimit_remaining'] = (
+                            response.headers.get('X-RateLimit-Remaining')
+                        )
                     else:
                         value = None
                 else:
@@ -87,13 +92,16 @@ class ProxyView(MethodView):
 
                 # we only need these for the long-storage stuff
                 value['_etag'] = response.headers.get('ETag')
-                #value['_last_modified'] = response.headers.get('Last-Modified')
                 cache.set(long_key, json.dumps(value), self.long_expires)
 
                 # these values aren't worth storing in the cache but
                 # useful to return as part of the response
-                value['_ratelimit_limit'] = response.headers.get('X-RateLimit-Limit')
-                value['_ratelimit_remaining'] = response.headers.get('X-RateLimit-Remaining')
+                value['_ratelimit_limit'] = (
+                    response.headers.get('X-RateLimit-Limit')
+                )
+                value['_ratelimit_remaining'] = (
+                    response.headers.get('X-RateLimit-Remaining')
+                )
 
         return make_response(jsonify(value))
 
@@ -110,18 +118,22 @@ class BugzillaProxyView(ProxyView):
     base = 'https://bugzilla.mozilla.org/rest/'
 
 
+@app.route('/')
+def index_html():
+    return catch_all('index.html')
+
+
 @app.route('/<path:path>')
 def catch_all(path):
     path = path or 'index.html'
+    path = os.path.join('client', path)
     # print "PATH", path
+
     if not (os.path.isdir(path) or os.path.isfile(path)):
-        # print "\tdidn't exist"
-        path = 'index.html'
-    # return send_file('../dist/%s' % path)
+        path = os.path.join('client', 'index.html')
     return send_file(path)
 
 
-# app.add_url_rule('/pulls/:owner/:repo', view_func=PullsView.as_view('pulls'))
 app.add_url_rule(
     '/githubproxy/<path:path>',
     view_func=GithubProxyView.as_view('githubproxy')
