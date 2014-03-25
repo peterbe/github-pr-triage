@@ -38,7 +38,7 @@
              </td>
              <td>
                  <img ng-src="{{ pull.user.avatar_url }}" class="avatar" alt="{{ pull.user.login }}">
-                 <a href="{{ pull.html_url }}" target="_blank">{{ pull.title }}</a>
+                 <a href="{{ pull.html_url }}" target="_blank">{{ pull.number}}: {{ pull.title }}</a>
 
                  <a href="" ng-click="toggleExpandPull(pull)">
                     <span class="glyphicon glyphicon-plus" ng-if="!pull._expanded"
