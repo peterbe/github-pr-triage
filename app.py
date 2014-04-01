@@ -15,9 +15,15 @@ MEMCACHE_URL = os.environ.get('MEMCACHE_URL', '127.0.0.1:11211').split(',')
 DEBUG = os.environ.get('DEBUG', False) in ('true', '1', 'y', 'yes')
 GITHUB_OAUTH_TOKEN = os.environ.get('GITHUB_OAUTH_TOKEN')
 
+APP_LOCATION = 'app'
+if os.path.isdir('./dist') and os.listdir('./dist'):
+    print "Note: Serving files from ./dist"
+    APP_LOCATION = 'dist'
+    
+
 app = Flask(
     __name__,
-    static_folder='app/static'
+    static_folder=os.path.join(APP_LOCATION, 'static')
 )
 cache = MemcachedCache(MEMCACHE_URL)
 
@@ -128,11 +134,11 @@ def catch_all(path):
     if path == 'favicon.ico':
         path = 'static/favicon.ico'
     path = path or 'index.html'
-    path = os.path.join('app', path)
+    path = os.path.join(APP_LOCATION, path)
     # print "PATH", path
 
     if not (os.path.isdir(path) or os.path.isfile(path)):
-        path = os.path.join('app', 'index.html')
+        path = os.path.join(APP_LOCATION, 'index.html')
     return send_file(path)
 
 
