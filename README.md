@@ -7,24 +7,41 @@ An example: [mozilla/socorro](https://prs.paas.allizom.org)
 License: [MPL2](http://www.mozilla.org/MPL/2.0/)
 
 
-## Installation
+## Install
 
-### Ubuntu
+### Dependencies
+
+ * python with pip
+ * memcached
+
+Ubuntu:
 
     sudo apt-get install python-pip memcached
-    sudo pip install Flask python-memcached
 
-generate a github oauth personal access token using
-[instructions here](https://help.github.com/articles/creating-an-access-token-for-command-line-use)
+### Requirements
+
+    pip install -r requirements.txt
+
+## Configure
+
+### GitHub
+Generate a github oauth personal access token with `public_repo` scope using
+[instructions here](https://help.github.com/articles/creating-an-access-token-for-command-line-use).
+
+### Environment
 
     export GITHUB_OAUTH_TOKEN=<token>
     export MEMCACHE_URL=localhost:11211
+
+## Run
+
     python app.py
 
-point your browser at http://localhost:5000
+point your browser at [http://localhost:5000](http://localhost:5000)
 
-## Deployment
+## Deploy
 
+### Stackato
 You can deploy this on Stackato by simply running:
 
 
