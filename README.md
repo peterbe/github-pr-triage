@@ -7,38 +7,65 @@ An example: [mozilla/socorro](https://prs.paas.allizom.org)
 License: [MPL2](http://www.mozilla.org/MPL/2.0/)
 
 
-## Installation
+## Install
 
-### Ubuntu
+### Dependencies
+
+ * python with pip
+ * memcached
+
+Ubuntu:
 
     sudo apt-get install python-pip memcached
-    sudo pip install Flask python-memcached
 
-generate a github oauth personal access token using
-[instructions here](https://help.github.com/articles/creating-an-access-token-for-command-line-use)
+### Requirements
+
+    pip install -r requirements.txt
+
+## Configure
+
+### GitHub
+Generate a github oauth personal access token with `public_repo` scope using
+[instructions here](https://help.github.com/articles/creating-an-access-token-for-command-line-use).
+
+### Environment
 
     export GITHUB_OAUTH_TOKEN=<token>
     export MEMCACHE_URL=localhost:11211
+
+## Run
+
     python app.py
 
-point your browser at http://localhost:5000
+point your browser at [http://localhost:5000](http://localhost:5000)
 
-## Deployment
+## Deploy
 
-You can deploy this on Stackato by simply running:
+### Prepare (Optional)
 
-
-    stackato push
-
-Now, before you do this you might want to make a "dist version" meaning a copy
-of the `./app` directory made for production use. All CSS and JS is
-concatenated and minified correctly. To do that you need to first:
-
-    pip install grymt
-
-Then run:
+You might want to make a "dist version" - a copy of the `./app` directory made
+for production use. All CSS and JS is concatenated and minified correctly.
+To do that you need to first:
 
     grymt -w -s ./app
 
 That will create a directory called "./dist" which will contain an optimized
 `index.html` which the server app (`app.py`) knows to serve instead.
+
+### Stackato
+You can deploy this on Stackato by simply running:
+
+    stackato push
+
+### Heroku
+
+Follow standard [Heroku Python
+Deployment](https://devcenter.heroku.com/articles/getting-started-with-python#deploy-your-application-to-heroku)
+
+Set the `GITHUB_OAUTH_TOKEN` environment variable on heroku:
+
+    heroku config:set GITHUB_OAUTH_TOKEN=<github-token>
+
+Send your browser to your Heroku app:
+
+    heroku open
