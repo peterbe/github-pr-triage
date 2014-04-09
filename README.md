@@ -41,21 +41,31 @@ point your browser at [http://localhost:5000](http://localhost:5000)
 
 ## Deploy
 
-### Stackato
-You can deploy this on Stackato by simply running:
+### Prepare (Optional)
 
-
-    stackato push
-
-Now, before you do this you might want to make a "dist version" meaning a copy
-of the `./app` directory made for production use. All CSS and JS is
-concatenated and minified correctly. To do that you need to first:
-
-    pip install grymt
-
-Then run:
+You might want to make a "dist version" - a copy of the `./app` directory made
+for production use. All CSS and JS is concatenated and minified correctly.
+To do that you need to first:
 
     grymt -w -s ./app
 
 That will create a directory called "./dist" which will contain an optimized
 `index.html` which the server app (`app.py`) knows to serve instead.
+
+### Stackato
+You can deploy this on Stackato by simply running:
+
+    stackato push
+
+### Heroku
+
+Follow standard [Heroku Python
+Deployment](https://devcenter.heroku.com/articles/getting-started-with-python#deploy-your-application-to-heroku)
+
+Set the `GITHUB_OAUTH_TOKEN` environment variable on heroku:
+
+    heroku config:set GITHUB_OAUTH_TOKEN=<github-token>
+
+Send your browser to your Heroku app:
+
+    heroku open
