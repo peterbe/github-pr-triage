@@ -95,3 +95,5 @@ Make sure it's Active and then click "Add webhook".
 
 Now it should hopefully inform the site when things change so that the cache
 can quickly be invalidated.
+
+![Screenshot of setting up Webhook](https://raw.githubusercontent.com/peterbe/github-pr-triage/master/webhook-screenshot.png)
