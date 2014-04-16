@@ -19,7 +19,7 @@ APP_LOCATION = 'app'
 if os.path.isdir('./dist') and os.listdir('./dist'):
     print "Note: Serving files from ./dist"
     APP_LOCATION = 'dist'
-    
+
 
 app = Flask(
     __name__,
@@ -122,6 +122,19 @@ class BugzillaProxyView(ProxyView):
 
     prefix = 'bugzilla'
     base = 'https://bugzilla.mozilla.org/rest/'
+
+
+class Webhook(MethodView):
+
+    def post(self):
+        print "Incoming webhook"
+        return make_response('OK')
+
+
+app.add_url_rule(
+    '/webhook',
+    view_func=Webhook.as_view('webhook')
+)
 
 
 @app.route('/')
