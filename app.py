@@ -30,7 +30,7 @@ cache = MemcachedCache(MEMCACHE_URL)
 
 class ProxyView(MethodView):
 
-    short_expires = 60 * 10  # when we serve straight from memcache
+    short_expires = 60 * 10*6  # when we serve straight from memcache
     long_expires = 60 * 60 * 24  # store long term
 
     def _attach_auth(self, headers):
@@ -42,13 +42,16 @@ class ProxyView(MethodView):
             assert path.startswith(self.base)
             path = path.replace(self.base, '')
         path = '%s?%s' % (path, request.query_string)
+        print "PATH", path
         key = self.prefix + hashlib.md5(path).hexdigest()
         short_key = 'short-' + key
         long_key = 'long-' + key
         value = cache.get(short_key)
         if value:
             value = json.loads(value)
+            print "CACHE HIT (SHORT)"
         else:
+            print "CACHE MISS (SHORT)"
             # do we have it in long-term memory? If so, do conditional get
             value = cache.get(long_key)
             if value:
@@ -128,7 +131,27 @@ class Webhook(MethodView):
 
     def post(self):
         print "Incoming webhook"
-        return make_response('OK')
+        payload = json.loads(request.form['payload'])
+        from pprint import pprint
+        # pprint(payload)
+        paths = []
+        if payload.get('action') == 'opened' and payload.get('repository'):
+            repo_full_name = payload['repository']['full_name']
+            print "FULL_NAME", repr(repo_full_name)
+            paths.append('repos/%s/pulls?state=open' % repo_full_name)
+
+
+        for path in paths:
+            cache_key = self._path_to_cache_key(path)
+            print "CACHE_KEY", cache_key
+            if cache.get(cache_key):
+                print "\tDELETED"
+                cache.delete(cache_key)
+
+        return make_response('OK\n')
+
+    def _path_to_cache_key(self, path):
+        return 'short-github' + hashlib.md5(path).hexdigest()
 
 
 app.add_url_rule(
