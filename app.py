@@ -42,16 +42,13 @@ class ProxyView(MethodView):
             assert path.startswith(self.base)
             path = path.replace(self.base, '')
         path = '%s?%s' % (path, request.query_string)
-        print "PATH", path,
         key = self.prefix + hashlib.md5(path).hexdigest()
         short_key = 'short-' + key
         long_key = 'long-' + key
         value = cache.get(short_key)
         if value:
             value = json.loads(value)
-            print "CACHE HIT (SHORT)"
         else:
-            print "CACHE MISS (SHORT)"
             # do we have it in long-term memory? If so, do conditional get
             value = cache.get(long_key)
             if value:

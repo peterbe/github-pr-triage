@@ -69,3 +69,29 @@ Set the `GITHUB_OAUTH_TOKEN` environment variable on heroku:
 Send your browser to your Heroku app:
 
     heroku open
+
+### Cache invalidation Webhook
+
+Once you have your site set up in production, you can set up a GitHub Webhook
+that pings this site whenever pull requests are created or updated in some way.
+What this does is that it immediately invalidates our cache so that you get
+more up to date information.
+
+To do that, go to your favorite GitHub project, click the "Settings".
+Then click "Webhooks & Services". Then click the "Add Webhook" button.
+
+Suppose you have this site set up at `http://somedomain.com/` then the
+"Payload URL" you need to enter is `http://somedomain.com/webhook`.
+
+Next, you need to select the "Let me select individual events" radio button.
+When a bunch of choices are offered, check:
+
+* Push
+* Pull Request
+* Issue comment
+* Pull Request review comment
+
+Make sure it's Active and then click "Add webhook".
+
+Now it should hopefully inform the site when things change so that the cache
+can quickly be invalidated.
