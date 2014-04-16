@@ -19,7 +19,7 @@ APP_LOCATION = 'app'
 if os.path.isdir('./dist') and os.listdir('./dist'):
     print "Note: Serving files from ./dist"
     APP_LOCATION = 'dist'
-    
+
 
 app = Flask(
     __name__,
@@ -42,13 +42,16 @@ class ProxyView(MethodView):
             assert path.startswith(self.base)
             path = path.replace(self.base, '')
         path = '%s?%s' % (path, request.query_string)
+        print "PATH", path,
         key = self.prefix + hashlib.md5(path).hexdigest()
         short_key = 'short-' + key
         long_key = 'long-' + key
         value = cache.get(short_key)
         if value:
             value = json.loads(value)
+            print "CACHE HIT (SHORT)"
         else:
+            print "CACHE MISS (SHORT)"
             # do we have it in long-term memory? If so, do conditional get
             value = cache.get(long_key)
             if value:
@@ -122,6 +125,58 @@ class BugzillaProxyView(ProxyView):
 
     prefix = 'bugzilla'
     base = 'https://bugzilla.mozilla.org/rest/'
+
+
+class Webhook(MethodView):
+
+    def post(self):
+        # print "Incoming webhook"
+        payload = json.loads(request.form['payload'])
+        # from pprint import pprint
+        # pprint(payload)
+        paths = []
+        if payload.get('action') == 'opened' and payload.get('repository'):
+            repo_full_name = payload['repository']['full_name']
+            # print "FULL_NAME", repr(repo_full_name)
+            paths.append('repos/%s/pulls?state=open' % repo_full_name)
+        elif payload.get('action') == 'synchronize' and payload.get('pull_request'):
+            # repo_full_name = payload['repository']['full_name']
+            commits_url = payload.get('pull_request').get('commits_url')
+            path = commits_url.replace(GithubProxyView.base, '')
+            paths.append(path)
+            paths.append(path + '?')
+
+            comments_url = payload.get('pull_request').get('comments_url')
+            path = comments_url.replace(GithubProxyView.base, '')
+            paths.append(path)
+            paths.append(path + '?')
+
+        if payload.get('pull_request', {}).get('statuses_url'):
+            statuses_url = payload['pull_request']['statuses_url']
+            path = statuses_url.replace(GithubProxyView.base, '')
+            paths.append(path)
+            paths.append(path + '?')
+
+        for path in paths:
+            cache_key = self._path_to_cache_key(path)
+            # print "CACHE_KEY", cache_key
+            if cache.get(cache_key):
+                print "\tDELETED", cache_key, 'FOR', path
+                cache.delete(cache_key)
+
+        if not paths:
+            return make_response("No action\n")
+
+        return make_response('OK\n')
+
+    def _path_to_cache_key(self, path):
+        return 'short-' + GithubProxyView.prefix + hashlib.md5(path).hexdigest()
+
+
+app.add_url_rule(
+    '/webhook',
+    view_func=Webhook.as_view('webhook')
+)
 
 
 @app.route('/')
