@@ -70,6 +70,12 @@ Send your browser to your Heroku app:
 
     heroku open
 
+### Docker
+
+    sudo docker run --name memcached -d borja/docker-memcached
+    sudo docker build -t triage .
+    sudo docker run --link memcached:memcached -p 5000:5000 -e GITHUB_OAUTH_TOKEN=<token> -d triage
+
 ### Cache invalidation Webhook
 
 Once you have your site set up in production, you can set up a GitHub Webhook
