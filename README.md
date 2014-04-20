@@ -47,7 +47,7 @@ You might want to make a "dist version" - a copy of the `./app` directory made
 for production use. All CSS and JS is concatenated and minified correctly.
 To do that you need to first:
 
-    grymt -w -s ./app
+    grymt -w ./app
 
 That will create a directory called "./dist" which will contain an optimized
 `index.html` which the server app (`app.py`) knows to serve instead.
