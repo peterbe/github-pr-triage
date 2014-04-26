@@ -2,17 +2,23 @@
 
 angular.module('triage.controllers', [])
 
-.controller('AppController', function($scope, $http, $location, ratelimit) {
+.controller('AppController',
+    ['$scope', '$http', '$location', 'ratelimit',
+    function($scope, $http, $location, ratelimit) {
     $scope.ratelimit = ratelimit.get;
-})
+}])
 
-.controller('FormController', function($scope, $location) {
+.controller('FormController',
+    ['$scope', '$location',
+    function($scope, $location) {
     $scope.submitForm = function() {
         $location.path('/' + this.owner + '/' + this.repo);
     };
-})
+}])
 
-.controller('PullsController', function($scope, $http, $routeParams, $location, ratelimit) {
+.controller('PullsController',
+    ['$scope', '$http', '$routeParams', '$location', 'ratelimit',
+    function($scope, $http, $routeParams, $location, ratelimit) {
     'use strict';
 
     $scope.owner = $routeParams.owner;
@@ -285,5 +291,5 @@ angular.module('triage.controllers', [])
     $scope.loading = true;
     loadPulls($scope.owner, $scope.repo);
 
-})
+}])
 ;
