@@ -71,7 +71,7 @@
              <td><time am-time-ago="pull.updated_at"></time>
              </td>
             <td ng-if="use_assigned">
-                 <a href="{{ pull.assignee.html_url }}" target="_blank" title="{{ pull.assignee.login }}">
+                 <a ng-if="pull.assignee" href="{{ pull.assignee.html_url }}" target="_blank" title="{{ pull.assignee.login }}">
                     <img ng-src="{{ pull.assignee.avatar_url }}" class="avatar" alt="{{ pull.assignee.login }}">
                  </a>
             </td>
