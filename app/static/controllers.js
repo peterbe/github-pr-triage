@@ -1,5 +1,3 @@
-'use strict';
-
 /* Controllers */
 
 angular.module('triage.controllers', [])
@@ -15,6 +13,7 @@ angular.module('triage.controllers', [])
 })
 
 .controller('PullsController', function($scope, $http, $routeParams, $location, ratelimit) {
+    'use strict';
 
     $scope.owner = $routeParams.owner;
     $scope.repo = $routeParams.repo;
@@ -227,7 +226,7 @@ angular.module('triage.controllers', [])
                 url: pull.html_url
             };
         }
-    };
+    }
 
     function loadPulls(owner, repo) {
         $http
