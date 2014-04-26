@@ -150,8 +150,7 @@ angular.module('triage.controllers', [])
             console.warn(data, status);
         })
         .finally(function() {
-            nanobar_level += nanobar_increments;
-            nanobar.go(nanobar_level);
+            nanobarIncrement();
         });
     }
 
@@ -168,8 +167,7 @@ angular.module('triage.controllers', [])
             console.warn(data, status);
         })
         .finally(function() {
-            nanobar_level += nanobar_increments;
-            nanobar.go(nanobar_level);
+            nanobarIncrement();
         });
     }
 
@@ -192,8 +190,7 @@ angular.module('triage.controllers', [])
             console.warn(data, status);
         })
         .finally(function() {
-            nanobar_level += nanobar_increments;
-            nanobar.go(nanobar_level);
+            nanobarIncrement();
         });
     }
 
@@ -287,6 +284,11 @@ angular.module('triage.controllers', [])
     var nanobar = new Nanobar();
     var nanobar_increments = null;
     var nanobar_level = 0;
+
+    function nanobarIncrement() {
+        nanobar_level += nanobar_increments;
+        nanobar.go(Math.ceil(nanobar_level));
+    }
 
     $scope.loading = true;
     loadPulls($scope.owner, $scope.repo);
