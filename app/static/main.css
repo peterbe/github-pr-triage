@@ -1,16 +1,16 @@
 .hidden { display: none; }
-#error {
+.error {
     display: none;
     padding: 100px;
     color: red;
 }
 td a { padding-right: 5px; }
-#cloak {
+.cloak {
    padding: 10px;
    height: 100%;
    width: 100%;
 }
-#cloak p { text-align:center; }
+.cloak p { text-align:center; }
 a.resolved { text-decoration: line-through !important; }
 img.avatar {
     border-radius: 4px;
@@ -39,6 +39,39 @@ footer p {
 table.expanded td {
     font-size: 80%;
 }
+
+.group {
+    margin-bottom: 40px;
+}
+
+a.closer {
+    color: #999;
+}
+a.closer:hover {
+    color: #333;
+}
+
+/* minimum widths needed when working with multiple tables */
+table.multiple th.bug {
+    width: 73px;
+}
+table.multiple th.last-updated {
+    width: 103px;
+}
+table.multiple th.last-actor {
+    width: 80px;
+}
+table.multiple th.people {
+    width: 104px;
+}
+table.multiple th.assigned {
+    width: 88px;
+}
+
+table.multiple th.state {
+    width: 46px;
+}
+
 
 @font-face{
   font-family:'octicons';

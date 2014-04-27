@@ -1,46 +1,56 @@
-<div>
-    <div id="error" ng-class="{hidden: !general_error}">
-       <h3>Error :(</h3>
-       <p>
-         {{ general_error }}
-       </p>
-    </div>
+<div class="error" ng-class="{hidden: !general_error}">
+   <h3>Error :(</h3>
+   <p>
+     {{ general_error }}
+   </p>
+</div>
 
-    <div id="cloak" ng-class="{hidden: !loading}">
+<div ng-repeat="group in groups" class="group">
+
+    <div class="cloak" ng-class="{hidden: !group.loading}">
         <p><img src="/static/keep-calm.png" alt="Keep Calm and Eat a Cookie"><br>
 
         <span class="blinking">Loading loading loading...<span class="dots"></span></span>
         </p>
     </div>
 
-    <h5>
-        All <a href="https://github.com/{{ owner }}/{{ repo }}/pulls">open pull requests</a>
-        for <a href="https://github.com/{{ owner }}/{{ repo }}">github.com/{{ owner }}/{{ repo }}</a>
-    </h5>
+    <h4>
+        All <a href="https://github.com/{{ group.owner }}/{{ group.repo }}/pulls">open pull requests</a>
+        for <a href="https://github.com/{{ group.owner }}/{{ group.repo }}">github.com/{{ group.owner }}/{{ group.repo }}</a>
+
+        <a href=""
+           ng-if="groups.length!=1"
+           ng-click="removeGroup(group.owner, group.repo)"
+           title="Click to remove this project from your page"
+           class="closer"
+           >&times;</a>
+    </h4>
 
     <table class="table table-condensed table-bordered"
-      ng-class="{hidden: !pulls.length}">
+      ng-class="{hidden: !group.pulls.length, multiple: groups.length!=1}">
      <thead>
      <tr>
-         <th>Bug</th>
-         <th>Title</th>
-         <th>Last Updated</th>
-         <th ng-if="use_assigned">Assigned
-             <a href="?hide-assigned=1" ng-click="hideAssigned()" title="Click to remove this column">&times;</a>
+         <th ng-if="use_bug" class="bug">Bug
+             <a href="" ng-click="hideBug()" title="Click to remove this column" ng-if="!group.loading" class="closer">&times;</a>
          </th>
-         <th>People</th>
-         <th>Last actor</th>
-         <th>State</th>
+         <th class="title">Title</th>
+         <th class="last-updated">Last Updated</th>
+         <th ng-if="use_assigned" class="assigned">Assigned
+             <a href="" ng-click="hideAssigned()" title="Click to remove this column" ng-if="!group.loading" class="closer">&times;</a>
+         </th>
+         <th class="people">People</th>
+         <th class="last-actor">Last actor</th>
+         <th class="state">State</th>
      </tr>
      </thead>
      <tbody>
-         <tr ng-repeat="pull in pulls | orderBy:'updated_at':true">
-             <td>
+         <tr ng-repeat="pull in group.pulls | orderBy:'updated_at':true">
+             <td ng-if="use_bug">
                  <a ng-repeat="bug in pull._bugs" href="https://bugzilla.mozilla.org/show_bug.cgi?id={{ bug }}" target="_blank"
                   title="{{ makeBugTitle(bug) }}" ng-class="{closed: isClosed(bug)}">{{ bug }}</a>
              </td>
              <td>
-                 <img ng-src="{{ pull.user.avatar_url }}" class="avatar" alt="{{ pull.user.login }}">
+                 <a href="{{ pull.user.html_url }}"><img ng-src="{{ pull.user.avatar_url }}" class="avatar" alt="{{ pull.user.login }}"></a>
                  <a href="{{ pull.html_url }}" target="_blank">{{ pull.number}}: {{ pull.title }}</a>
 
                  <a href="" ng-click="toggleExpandPull(pull)">
@@ -82,7 +92,7 @@
                  </a>
             </td>
             <td>
-                    <img ng-src="{{ pull._last_actor.user.avatar_url }}" class="avatar" alt="{{ pull._last_actor.user.avatar_url }}">
+                    <a href="{{ pull._last_actor.user.html_url }}"><img ng-src="{{ pull._last_actor.user.avatar_url }}" class="avatar" alt="{{ pull._last_actor.user.avatar_url }}"></a>
                     <a href="{{ pull._last_actor.url }}" target="_blank">
                         <span ng-if="pull._last_actor.type === 'commit'" title="commit added" class="octicon octicon-git-commit"></span>
                         <span ng-if="pull._last_actor.type === 'comment'" title="comment posted" class="octicon octicon-comment"></span>
@@ -103,5 +113,23 @@
         </tr>
      </tbody>
     </table>
-    <p><a href="/">Pick another project</a></p>
 </div>
+<p>
+    <a href="" ng-click="show_add_form=true">Add another project to this page</a>
+    &nbsp;
+    <a href="/">Pick a different project</a>
+</p>
+
+<form role="form" ng-class="{hidden: !show_add_form}" ng-submit="submitForm()">
+  <div class="form-group">
+    <label for="new_owner">Owner</label>
+    <input type="text" name="new_owner" class="form-control" id="new_owner" placeholder="e.g. mozilla" ng-model="new_owner">
+  </div>
+  <div class="form-group">
+    <label for="new_repos">Repos</label>
+    <input type="text" name="new_repos" class="form-control" id="new_repos" placeholder="e.g. socorro, servo" ng-model="new_repos">
+  </div>
+  <div>
+    <button class="btn btn-primary">Add. It!</button>
+  </div>
+</form>

@@ -30,8 +30,10 @@ cache = MemcachedCache(MEMCACHE_URL)
 
 class ProxyView(MethodView):
 
-    short_expires = 60 * 10  # when we serve straight from memcache
-    long_expires = 60 * 60 * 24  # store long term
+    # when we serve straight from memcache
+    short_expires = 60 * 5  * (1 + 3 * int(DEBUG))
+    # store long term
+    long_expires = 60 * 60 * 24
 
     def _attach_auth(self, headers):
         if GITHUB_OAUTH_TOKEN:

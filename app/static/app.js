@@ -8,6 +8,14 @@ angular.module('triage', [
     $locationProvider.html5Mode(true);
 
     $routeProvider
+    // where we parse the wildcard to be split by ';' and look something
+    // like this:
+    //  owner1:projectA,projectB;owner2:projectC;etc.
+    .when('/:wildcard', {
+        templateUrl: "/partials/table.html",
+        controller: 'PullsController'
+    })
+    // the legacy one
     .when('/:owner/:repo', {
         templateUrl: "/partials/table.html",
         controller: 'PullsController'
