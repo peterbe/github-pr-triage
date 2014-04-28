@@ -77,28 +77,26 @@ app.classy.controller({
         this.$scope.loading = true;
         this.$scope.groups = [];
         // there are 4 requests we need to make per project
-        var self = this;
         this.$scope.owners.forEach(function(owner, i) {
             var group = {
                 owner: owner,
-                repo: self.$scope.repos[i],
+                repo: this.$scope.repos[i],
                 loading: true,
                 pulls: []
             };
-            self.loadPulls(group, 100 / self.$scope.owners.length);
-            self.$scope.groups.push(group);
-        });
+            this.loadPulls(group, 100 / this.$scope.owners.length);
+            this.$scope.groups.push(group);
+        }, this);
 
     },
 
     submitForm: function() {
         var repos = [];
         var new_owner = this.$.new_owner.trim();
-        var self = this;
         this.$.new_repos.split(',').forEach(function(repo) {
-            self.$scope.owners.push(new_owner);
-            self.$scope.repos.push(repo.trim());
-        });
+            this.$scope.owners.push(new_owner);
+            this.$scope.repos.push(repo.trim());
+        }, this);
 
         this.$location.path(this._newPath(this.$scope.owners, this.$scope.repos));
     },
@@ -123,14 +121,12 @@ app.classy.controller({
 
     removeGroup: function(owner, repo) {
         var new_owners = [], new_repos = [];
-        var self = this;
         this.$scope.owners.forEach(function(each_owner, i) {
-
-            if (!(each_owner === owner && self.$scope.repos[i] === repo)) {
+            if (!(each_owner === owner && this.$scope.repos[i] === repo)) {
                 new_owners.push(each_owner);
-                new_repos.push(self.$scope.repos[i]);
+                new_repos.push(this.$scope.repos[i]);
             }
-        });
+        }, this);
         this.$location.path(this._newPath(new_owners, new_repos));
     },
 
@@ -242,19 +238,18 @@ app.classy.controller({
     },
 
     loadComments: function(pull, callback) {
-        var self = this;
-        self.$http
+        this.$http
         .get('/githubproxy/' + pull.comments_url)
         .success(function(data) {
             if (data._ratelimit_limit) {
-                self.ratelimit.update(data._ratelimit_limit, data._ratelimit_remaining);
+                this.ratelimit.update(data._ratelimit_limit, data._ratelimit_remaining);
             }
             pull._comments = data._data;
             if (pull._comments.length) {
                 pull._last_comment = pull._comments[pull._comments.length - 1];
-                self.setLastActor(pull);
+                this.setLastActor(pull);
             }
-        })
+        }.bind(this))
         .error(function(data, status) {
             console.warn(data, status);
         })
@@ -264,15 +259,14 @@ app.classy.controller({
     },
 
     loadStatuses: function(pull, callback) {
-        var self = this;
-        self.$http
+        this.$http
         .get('/githubproxy/' + pull.statuses_url)
         .success(function(data) {
             if (data._ratelimit_limit) {
-                self.ratelimit.update(data._ratelimit_limit, data._ratelimit_remaining);
+                this.ratelimit.update(data._ratelimit_limit, data._ratelimit_remaining);
             }
             pull._statuses = data._data;
-        })
+        }.bind(this))
         .error(function(data, status) {
             console.warn(data, status);
         })
@@ -282,19 +276,18 @@ app.classy.controller({
     },
 
     loadCommits: function(pull, callback) {
-        var self = this;
-        self.$http
+        this.$http
         .get('/githubproxy/' + pull.commits_url)
         .success(function(data) {
             if (data._ratelimit_limit) {
-                self.ratelimit.update(data._ratelimit_limit, data._ratelimit_remaining);
+                this.ratelimit.update(data._ratelimit_limit, data._ratelimit_remaining);
             }
             pull._commits = data._data;
             if (pull._commits.length > 1) {
                 pull._last_commit = pull._commits[pull._commits.length - 1];
-                self.setLastActor(pull);
+                this.setLastActor(pull);
             }
-        })
+        }.bind(this))
         .error(function(data, status) {
             console.warn(data, status);
         })
@@ -341,15 +334,14 @@ app.classy.controller({
     },
 
     loadPulls: function(group, base_increment) {
-        var self = this;
-        self.$http
+        this.$http
         .get('/githubproxy/repos/' + group.owner + '/' + group.repo + '/pulls?state=open')
         .success(function(data, status, headers) {
             //console.dir(data);
             var pulls = [];
             var bugs = [];
             if (data._ratelimit_limit) {
-                self.ratelimit.update(data._ratelimit_limit, data._ratelimit_remaining);
+                this.ratelimit.update(data._ratelimit_limit, data._ratelimit_remaining);
             }
             // To work out the increments for the nanobar, start with assuming
             // this group has 3 things it needs to do per pull request
@@ -357,37 +349,37 @@ app.classy.controller({
             if (data._data.length) {
                 increment = base_increment / (data._data.length * 3);
             }
-            _.each(data._data, function(pull) {
+            data._data.forEach(function(pull) {
                 pull._bugs = findBugNumbers(pull.title);
                 bugs = _.union(bugs, pull._bugs);
                 pull._last_user = pull.user;
                 pull._last_user_time = pull.created_at;
-                self.setLastActor(pull);
+                this.setLastActor(pull);
                 pulls.push(pull);
-                self.loadComments(pull, function() {
-                    self.nanobarIncrement(increment);
-                    self.loadStatuses(pull, function() {
-                        self.nanobarIncrement(increment);
-                        self.loadCommits(pull, function() {
-                            self.nanobarIncrement(increment);
+                this.loadComments(pull, function() {
+                    this.nanobarIncrement(increment);
+                    this.loadStatuses(pull, function() {
+                        this.nanobarIncrement(increment);
+                        this.loadCommits(pull, function() {
+                            this.nanobarIncrement(increment);
                         });
                     });
                 });
-            });
+            }, this);
             group.pulls = pulls;
-            self.$http
+            this.$http
             .get('/bugzillaproxy/bug?id=' + bugs.join(',') + '&include_fields=summary,id,status,resolution,is_open')
             .success(function(data, status) {
                 var bugs = {};
                 _.each(data.bugs, function(bug) {
                     bugs[bug.id] = bug;
                 });
-                self.$scope.bugs = bugs;
-            })
+                this.$scope.bugs = bugs;
+            }.bind(this))
             .error(function(data, status) {
                 console.warn(data, status);
             });
-        })
+        }.bind(this))
         .error(function(data, status) {
         })
         .finally(function() {
