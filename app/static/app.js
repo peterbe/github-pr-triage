@@ -1,7 +1,8 @@
 angular.module('triage', [
     'ngRoute',
     'angularMoment',
-    'triage.controllers'
+    'triage.controllers',
+    'classy'
 ])
 
 .config(['$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider) {

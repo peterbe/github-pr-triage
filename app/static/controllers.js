@@ -1,66 +1,109 @@
+/* Utility functions */
+
+function truncate(s, l) {
+    if (s.length > l) {
+        return s.substring(0, l).trim() + '...';
+    }
+    return s;
+}
+
+function findBugNumbers(title) {
+    var re = /\b[0-9]{6,10}\b/;
+    var bugs = [];
+    _.each(re.exec(title), function(bug) {
+        bugs.push(bug);
+    });
+    return bugs;
+}
+
+
 /* Controllers */
 
-angular.module('triage.controllers', [])
+var app = angular.module('triage.controllers', ['classy']);
 
-.controller('AppController',
-    ['$scope', '$http', '$location', 'ratelimit',
-    function($scope, $http, $location, ratelimit) {
-    $scope.ratelimit = ratelimit.get;
-}])
+app.classy.controller({
+    name: 'AppController',
+    inject: ['$scope', '$http', '$location', 'ratelimit'],
+    init: function() {
+        this.$.ratelimit = this.ratelimit.get;
+    }
+});
 
-.controller('FormController',
-    ['$scope', '$location',
-    function($scope, $location) {
-    $scope.submitForm = function() {
+app.classy.controller({
+    name: 'FormController',
+    inject: ['$scope', '$location'],
+    init: function() {},
+    submitForm: function() {
         var repos = [];
-        this.repos.split(',').forEach(function(repo) {
+        this.$.repos.split(',').forEach(function(repo) {
             repos.push(repo.trim());
         });
-        $location.path('/' + this.owner.trim() + ':' + repos.join(','));
-    };
-}])
-
-.controller('PullsController',
-    ['$scope', '$http', '$routeParams', '$location', 'ratelimit',
-    function($scope, $http, $routeParams, $location, ratelimit) {
-    'use strict';
-
-    if ($routeParams.owner && $routeParams.repo) {
-        // legacy case
-        $scope.owners = [$routeParams.owner];
-        $scope.repos = [$routeParams.repo];
-    } else {
-        var owners = [];
-        var repos = [];
-        $routeParams.wildcard.split(';').forEach(function(each) {
-            var owner = each.split(':')[0];
-            var owner_repos = each.split(':')[1].split(',');
-            owner_repos.forEach(function(owner_repo) {
-                owners.push(owner);
-                repos.push(owner_repo);
-            });
-        });
-        $scope.owners = owners;
-        $scope.repos = repos;
+        this.$location.path('/' + this.$.owner.trim() + ':' + repos.join(','));
     }
-    $scope.use_assigned = $location.hash().indexOf('hide-assigned') === -1;
-    $scope.use_bug = $location.hash().indexOf('hide-bug') === -1;
+});
 
-    $scope.bugs = {};
+app.classy.controller({
+    name: 'PullsController',
+    inject: ['$scope', '$http', '$routeParams', '$location', 'ratelimit'],
+    init: function() {
+        'use strict';
 
-    $scope.submitForm = function() {
-        var repos = [];
-        var new_owner = this.new_owner.trim();
-        this.new_repos.split(',').forEach(function(repo) {
-            $scope.owners.push(new_owner);
-            $scope.repos.push(repo.trim());
+        if (this.$routeParams.owner && this.$routeParams.repo) {
+            // legacy case
+            this.$scope.owners = [this.$routeParams.owner];
+            this.$scope.repos = [this.$routeParams.repo];
+        } else {
+            var owners = [];
+            var repos = [];
+            this.$routeParams.wildcard.split(';').forEach(function(each) {
+                var owner = each.split(':')[0];
+                var owner_repos = each.split(':')[1].split(',');
+                owner_repos.forEach(function(owner_repo) {
+                    owners.push(owner);
+                    repos.push(owner_repo);
+                });
+            });
+            this.$scope.owners = owners;
+            this.$scope.repos = repos;
+        }
+        this.$scope.use_assigned = this.$location.hash().indexOf('hide-assigned') === -1;
+        this.$scope.use_bug = this.$location.hash().indexOf('hide-bug') === -1;
+
+        this.$scope.bugs = {};
+
+        this.nanobar = new Nanobar();
+        this.nanobar_level = 0;
+
+        this.$scope.loading = true;
+        this.$scope.groups = [];
+        // there are 4 requests we need to make per project
+        var self = this;
+        this.$scope.owners.forEach(function(owner, i) {
+            var group = {
+                owner: owner,
+                repo: self.$scope.repos[i],
+                loading: true,
+                pulls: []
+            };
+            self.loadPulls(group, 100 / self.$scope.owners.length);
+            self.$scope.groups.push(group);
         });
 
-        $location.path(_newPath($scope.owners, $scope.repos));
+    },
 
-    };
+    submitForm: function() {
+        var repos = [];
+        var new_owner = this.$.new_owner.trim();
+        var self = this;
+        this.$.new_repos.split(',').forEach(function(repo) {
+            self.$scope.owners.push(new_owner);
+            self.$scope.repos.push(repo.trim());
+        });
 
-    function _newPath(owners, repos) {
+        this.$location.path(this._newPath(this.$scope.owners, this.$scope.repos));
+    },
+
+    _newPath: function(owners, repos) {
         var path = '/';
         var prev_owner = null;
         owners.forEach(function(owner, i) {
@@ -76,53 +119,48 @@ angular.module('triage.controllers', [])
             prev_owner = owner;
         });
         return path;
-    }
+    },
 
-    $scope.removeGroup = function(owner, repo) {
+    removeGroup: function(owner, repo) {
         var new_owners = [], new_repos = [];
-        $scope.owners.forEach(function(each_owner, i) {
+        var self = this;
+        this.$scope.owners.forEach(function(each_owner, i) {
 
-            if (!(each_owner === owner && $scope.repos[i] === repo)) {
+            if (!(each_owner === owner && self.$scope.repos[i] === repo)) {
                 new_owners.push(each_owner);
-                new_repos.push($scope.repos[i]);
+                new_repos.push(self.$scope.repos[i]);
             }
         });
-        $location.path(_newPath(new_owners, new_repos));
-    };
+        this.$location.path(this._newPath(new_owners, new_repos));
+    },
 
-    $scope.toggleExpandPull = function(pull) {
+    toggleExpandPull: function(pull) {
         if (!pull._expanded) {
-            pull._events = $scope.getEvents(pull);
+            pull._events = this.$scope.getEvents(pull);
         }
         pull._expanded = !pull._expanded;
-    };
+    },
 
-    function truncate(s, l) {
-        if (s.length > l) {
-            return s.substring(0, l).trim() + '...';
-        }
-        return s;
-    }
 
-    $scope.hideAssigned = function() {
-        if (!$scope.use_bug) {
-            $location.hash('hide-bug,hide-assigned');
+    hideAssigned: function() {
+        if (!this.$scope.use_bug) {
+            this.$location.hash('hide-bug,hide-assigned');
         } else {
-            $location.hash('hide-assigned');
+            this.$location.hash('hide-assigned');
         }
-        $scope.use_assigned = false;
-    };
+        this.$scope.use_assigned = false;
+    },
 
-    $scope.hideBug = function() {
-        if (!$scope.use_assigned) {
-            $location.hash('hide-bug,hide-assigned');
+    hideBug: function() {
+        if (!this.$scope.use_assigned) {
+            this.$location.hash('hide-bug,hide-assigned');
         } else {
-            $location.hash('hide-bug');
+            this.$location.hash('hide-bug');
         }
-        $scope.use_bug = false;
-    };
+        this.$scope.use_bug = false;
+    },
 
-    $scope.getEvents = function(pull) {
+    getEvents: function(pull) {
         var events = [];
 
         _.each(pull._commits || [], function(commit) {
@@ -155,27 +193,19 @@ angular.module('triage.controllers', [])
         //console.dir(events);
         //return [];
         return events;
-    };
+    },
 
-    function findBugNumbers(title) {
-        var re = /\b[0-9]{6,10}\b/;
-        var bugs = [];
-        _.each(re.exec(title), function(bug) {
-            bugs.push(bug);
-        });
-        return bugs;
-    }
-
-    $scope.makeBugTitle = function(id) {
+    makeBugTitle: function(id) {
         id = +id;
-        return $scope.bugs[id] && $scope.bugs[id].summary || '';
-    };
-    $scope.isClosed = function(id) {
-        id = +id;
-        return $scope.bugs[id] && !$scope.bugs[id].is_open || null;
-    };
+        return this.$scope.bugs[id] && this.$scope.bugs[id].summary || '';
+    },
 
-    $scope.uniqueUsers = function(pull) {
+    isClosed: function(id) {
+        id = +id;
+        return this.$scope.bugs[id] && !this.$scope.bugs[id].is_open || null;
+    },
+
+    uniqueUsers: function(pull) {
         var users = [];
         var userids = {};
         userids[pull.user.id] = 1;
@@ -187,40 +217,42 @@ angular.module('triage.controllers', [])
             }
         });
         return users;
-    };
-    $scope.getStatuses = function(pull) {
+    },
+
+    getStatuses: function(pull) {
         return pull._statuses || [];
-    };
+    },
 
-    $scope.countComments = function(pull) {
+    countComments: function(pull) {
         return pull._comments && pull._comments.length || 0;
-    };
+    },
 
-    $scope.isMergeable = function(pull) {
+    isMergeable: function(pull) {
         return !!pull.merge_commit_sha;
-    };
+    },
 
-    $scope.hasStatuses = function(pull) {
+    hasStatuses: function(pull) {
         return pull._statuses && pull._statuses.length;
-    };
+    },
 
-    $scope.isLastStatus = function(pull, state) {
+    isLastStatus: function(pull, state) {
         var statuses = pull._statuses || [];
         var last = statuses[0];  // confusing, I know
         return last.state === state;
-    };
+    },
 
-    function loadComments(pull, callback) {
-        $http
+    loadComments: function(pull, callback) {
+        var self = this;
+        self.$http
         .get('/githubproxy/' + pull.comments_url)
         .success(function(data) {
             if (data._ratelimit_limit) {
-                ratelimit.update(data._ratelimit_limit, data._ratelimit_remaining);
+                self.ratelimit.update(data._ratelimit_limit, data._ratelimit_remaining);
             }
             pull._comments = data._data;
             if (pull._comments.length) {
                 pull._last_comment = pull._comments[pull._comments.length - 1];
-                setLastActor(pull);
+                self.setLastActor(pull);
             }
         })
         .error(function(data, status) {
@@ -229,14 +261,15 @@ angular.module('triage.controllers', [])
         .finally(function() {
             if (callback) callback();
         });
-    }
+    },
 
-    function loadStatuses(pull, callback) {
-        $http
+    loadStatuses: function(pull, callback) {
+        var self = this;
+        self.$http
         .get('/githubproxy/' + pull.statuses_url)
         .success(function(data) {
             if (data._ratelimit_limit) {
-                ratelimit.update(data._ratelimit_limit, data._ratelimit_remaining);
+                self.ratelimit.update(data._ratelimit_limit, data._ratelimit_remaining);
             }
             pull._statuses = data._data;
         })
@@ -246,19 +279,20 @@ angular.module('triage.controllers', [])
         .finally(function() {
             if (callback) callback();
         });
-    }
+    },
 
-    function loadCommits(pull, callback) {
-        $http
+    loadCommits: function(pull, callback) {
+        var self = this;
+        self.$http
         .get('/githubproxy/' + pull.commits_url)
         .success(function(data) {
             if (data._ratelimit_limit) {
-                ratelimit.update(data._ratelimit_limit, data._ratelimit_remaining);
+                self.ratelimit.update(data._ratelimit_limit, data._ratelimit_remaining);
             }
             pull._commits = data._data;
             if (pull._commits.length > 1) {
                 pull._last_commit = pull._commits[pull._commits.length - 1];
-                setLastActor(pull);
+                self.setLastActor(pull);
             }
         })
         .error(function(data, status) {
@@ -267,9 +301,9 @@ angular.module('triage.controllers', [])
         .finally(function() {
             if (callback) callback();
         });
-    }
+    },
 
-    function setLastActor(pull) {
+    setLastActor: function(pull) {
         if (pull._last_commit && pull._last_comment) {
             // but who was first?!
             if (pull._last_commit.commit.date > pull._last_comment.created_at) {
@@ -304,17 +338,18 @@ angular.module('triage.controllers', [])
                 url: pull.html_url
             };
         }
-    }
+    },
 
-    function loadPulls(group, base_increment) {
-        $http
+    loadPulls: function(group, base_increment) {
+        var self = this;
+        self.$http
         .get('/githubproxy/repos/' + group.owner + '/' + group.repo + '/pulls?state=open')
         .success(function(data, status, headers) {
             //console.dir(data);
             var pulls = [];
             var bugs = [];
             if (data._ratelimit_limit) {
-                ratelimit.update(data._ratelimit_limit, data._ratelimit_remaining);
+                self.ratelimit.update(data._ratelimit_limit, data._ratelimit_remaining);
             }
             // To work out the increments for the nanobar, start with assuming
             // this group has 3 things it needs to do per pull request
@@ -327,27 +362,27 @@ angular.module('triage.controllers', [])
                 bugs = _.union(bugs, pull._bugs);
                 pull._last_user = pull.user;
                 pull._last_user_time = pull.created_at;
-                setLastActor(pull);
+                self.setLastActor(pull);
                 pulls.push(pull);
-                loadComments(pull, function() {
-                    nanobarIncrement(increment);
-                    loadStatuses(pull, function() {
-                        nanobarIncrement(increment);
-                        loadCommits(pull, function() {
-                            nanobarIncrement(increment);
+                self.loadComments(pull, function() {
+                    self.nanobarIncrement(increment);
+                    self.loadStatuses(pull, function() {
+                        self.nanobarIncrement(increment);
+                        self.loadCommits(pull, function() {
+                            self.nanobarIncrement(increment);
                         });
                     });
                 });
             });
             group.pulls = pulls;
-            $http
+            self.$http
             .get('/bugzillaproxy/bug?id=' + bugs.join(',') + '&include_fields=summary,id,status,resolution,is_open')
             .success(function(data, status) {
                 var bugs = {};
                 _.each(data.bugs, function(bug) {
                     bugs[bug.id] = bug;
                 });
-                $scope.bugs = bugs;
+                self.$scope.bugs = bugs;
             })
             .error(function(data, status) {
                 console.warn(data, status);
@@ -358,29 +393,16 @@ angular.module('triage.controllers', [])
         .finally(function() {
             group.loading = false;
         });
+    },
+
+    nanobarIncrement: function(increment) {
+        if (this.nanobar_level >= 100) {
+            console.log('> 100');
+            return;
+        }
+        this.nanobar_level += increment;
+        this.nanobar.go(Math.min(100, Math.ceil(this.nanobar_level)));
     }
-    var nanobar = new Nanobar();
-    var nanobar_level = 0;
 
-    function nanobarIncrement(increment) {
-        if (nanobar_level >= 100) return;
-        nanobar_level += increment;
-        nanobar.go(Math.min(100, Math.ceil(nanobar_level)));
-    }
-
-    $scope.loading = true;
-    $scope.groups = [];
-    // there are 4 requests we need to make per project
-    $scope.owners.forEach(function(owner, i) {
-        var group = {
-            owner: owner,
-            repo: $scope.repos[i],
-            loading: true,
-            pulls: []
-        };
-        loadPulls(group, 100 / $scope.owners.length);
-        $scope.groups.push(group);
-    });
-
-}])
+})
 ;
