@@ -1,5 +1,5 @@
-<div>
-    <form role="form" ng-class="{hidden: pulls.length}" ng-submit="submitForm()">
+<div class="row">
+    <form role="form" ng-class="{hidden: pulls.length}" ng-submit="submitForm()" class="col-md-6">
       <div class="form-group">
         <label for="owner">Owner</label>
         <input type="text" name="owner" class="form-control" id="owner" placeholder="e.g. mozilla" ng-model="owner">
@@ -12,4 +12,16 @@
         <button class="btn btn-primary">Do. It!</button>
       </div>
     </form>
+
+    <form role="form" ng-class="{hidden: pulls.length}" ng-submit="submitForm(true)" class="col-md-6">
+      <h4>Alternatively just...</h4>
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" name="username" class="form-control" id="username" placeholder="e.g. peterbe" ng-model="username">
+      </div>
+      <div>
+        <button class="btn btn-primary">Do. It!</button>
+      </div>
+    </form>
+
 </div>

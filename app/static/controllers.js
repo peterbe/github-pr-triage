@@ -16,6 +16,17 @@ function findBugNumbers(title) {
     return bugs;
 }
 
+ function pySplit(str, sep, num) {
+    var pieces = str.split(sep);
+    if (arguments.length < 3) {
+        return pieces;
+    }
+    if (pieces.length < num) {
+        return pieces;
+    }
+    return pieces.slice(0, num).concat(pieces.slice(num).join(sep));
+ }
+
 
 /* Controllers */
 
@@ -33,12 +44,17 @@ app.classy.controller({
     name: 'FormController',
     inject: ['$scope', '$location'],
     init: function() {},
-    submitForm: function() {
-        var repos = [];
-        this.$.repos.split(',').forEach(function(repo) {
-            repos.push(repo.trim());
-        });
-        this.$location.path('/' + this.$.owner.trim() + ':' + repos.join(','));
+    submitForm: function(use_username) {
+        use_username = use_username || false;
+        if (use_username) {
+            this.$location.path('/' + this.$.username.trim());
+        } else {
+            var repos = [];
+            this.$.repos.split(',').forEach(function(repo) {
+                repos.push(repo.trim());
+            });
+            this.$location.path('/' + this.$.owner.trim() + ':' + repos.join(','));
+        }
     }
 });
 
@@ -55,14 +71,27 @@ app.classy.controller({
         } else {
             var owners = [];
             var repos = [];
-            this.$routeParams.wildcard.split(';').forEach(function(each) {
-                var owner = each.split(':')[0];
-                var owner_repos = each.split(':')[1].split(',');
-                owner_repos.forEach(function(owner_repo) {
-                    owners.push(owner);
-                    repos.push(owner_repo);
-                });
-            });
+            var wildcard = this.$routeParams.wildcard;
+            wildcard.split(';').forEach(function(each) {
+                if (each.indexOf(':') === -1) {
+                    // e.g. /myusername
+                    if (wildcard.indexOf(';') === -1) {
+                        // yeah, must be
+                        this._getUserRepos(each, function(owners, repos) {
+                            this.$scope.owners = owners;
+                            this.$scope.repos = repos;
+                            this._startLoading();
+                        }.bind(this));
+                    }
+                } else {
+                    var owner = each.split(':')[0];
+                    var owner_repos = each.split(':')[1].split(',');
+                    owner_repos.forEach(function(owner_repo) {
+                        owners.push(owner);
+                        repos.push(owner_repo);
+                    });
+                }
+            }.bind(this));
             this.$scope.owners = owners;
             this.$scope.repos = repos;
         }
@@ -74,6 +103,13 @@ app.classy.controller({
         this.nanobar = new Nanobar();
         this.nanobar_level = 0;
 
+        if (this.$scope.owners.length && this.$scope.repos.length) {
+            this._startLoading();
+        }
+
+    },
+
+    _startLoading: function() {
         this.$scope.loading = true;
         this.$scope.groups = [];
         // there are 4 requests we need to make per project
@@ -87,7 +123,6 @@ app.classy.controller({
             this.loadPulls(group, 100 / this.$scope.owners.length);
             this.$scope.groups.push(group);
         }, this);
-
     },
 
     submitForm: function() {
@@ -99,6 +134,30 @@ app.classy.controller({
         }, this);
 
         this.$location.path(this._newPath(this.$scope.owners, this.$scope.repos));
+    },
+
+    _getUserRepos: function(username, callback) {
+        this.$http
+        .get('/githubproxy/users/' + username + '/events')
+        .success(function(data) {
+            // console.log("DATA", data._data);
+            var events = data._data;
+            var repos_set = {};
+            events.forEach(function(item, i) {
+                repos_set[item.repo.name] = 1;
+            });
+            var owners = [];
+            var repos = [];
+            for (var name in repos_set) {
+                var combo = pySplit(name, '/', 1);
+                owners.push(combo[0]);
+                repos.push(combo[1]);
+            }
+            callback(owners, repos);
+        }.bind(this))
+        .error(function(data, status) {
+            console.warn(data, status);
+        });
     },
 
     _newPath: function(owners, repos) {
