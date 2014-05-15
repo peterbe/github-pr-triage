@@ -282,8 +282,20 @@ app.classy.controller({
         return pull._comments && pull._comments.length || 0;
     },
 
-    isMergeable: function(pull) {
-        return !!pull.merge_commit_sha;
+    function loadMergeableStatus(pull, callback) {
+        this.$http
+        .get('/githubproxy/' + pull.url)
+        .success(function(data) {
+            if (data._ratelimit_limit) {
+                this.ratelimit.update(data._ratelimit_limit, data._ratelimit_remaining);
+            }
+            pull._is_mergeable =  data.mergeable;
+        }.bind(this)).error(function(data, status) {
+            console.warn(data, status);
+        })
+        .finally(function() {
+            if (callback) callback();
+        });
     },
 
     hasStatuses: function(pull) {
@@ -403,10 +415,10 @@ app.classy.controller({
                 this.ratelimit.update(data._ratelimit_limit, data._ratelimit_remaining);
             }
             // To work out the increments for the nanobar, start with assuming
-            // this group has 3 things it needs to do per pull request
+            // this group has 4 things it needs to do per pull request
             var increment = null;
             if (data._data.length) {
-                increment = base_increment / (data._data.length * 3);
+                increment = base_increment / (data._data.length * 4);
             }
             data._data.forEach(function(pull) {
                 pull._bugs = findBugNumbers(pull.title);
@@ -415,12 +427,24 @@ app.classy.controller({
                 pull._last_user_time = pull.created_at;
                 this.setLastActor(pull);
                 pulls.push(pull);
+<<<<<<< HEAD
                 this.loadComments(pull, function() {
                     this.nanobarIncrement(increment);
                     this.loadStatuses(pull, function() {
                         this.nanobarIncrement(increment);
                         this.loadCommits(pull, function() {
                             this.nanobarIncrement(increment);
+=======
+                loadComments(pull, function() {
+                    nanobarIncrement(increment);
+                    loadStatuses(pull, function() {
+                        nanobarIncrement(increment);
+                        loadCommits(pull, function() {
+                            nanobarIncrement(increment);
+                            loadMergeableStatus(pull, function() {
+                                nanobarIncrement(increment);
+                            });
+>>>>>>> 3e4add1c91b04f548fd97540e5c6dbea47f9710e
                         });
                     });
                 });
@@ -455,5 +479,23 @@ app.classy.controller({
         this.nanobar.go(Math.min(100, Math.ceil(this.nanobar_level)));
     }
 
+<<<<<<< HEAD
 })
+=======
+    $scope.loading = true;
+    $scope.groups = [];
+    // there are 5 requests we need to make per project
+    $scope.owners.forEach(function(owner, i) {
+        var group = {
+            owner: owner,
+            repo: $scope.repos[i],
+            loading: true,
+            pulls: []
+        };
+        loadPulls(group, 100 / $scope.owners.length);
+        $scope.groups.push(group);
+    });
+
+}])
+>>>>>>> 3e4add1c91b04f548fd97540e5c6dbea47f9710e
 ;

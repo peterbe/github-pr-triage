@@ -100,10 +100,9 @@
                     </a>
 
             </td>
-
             <td>
-                 <span ng-if="isMergeable(pull)" title="Can be merged" class="good glyphicon glyphicon-ok"></span>
-                 <span ng-if="!isMergeable(pull)" title="We can’t automatically merge this pull request." class="bad glyphicon glyphicon-resize-full"></span>
+                 <span ng-if="pull._is_mergeable" title="Can be merged" class="good glyphicon glyphicon-ok"></span>
+                 <span ng-if="!pull._is_mergeable" title="We can’t automatically merge this pull request." class="bad glyphicon glyphicon-resize-full"></span>
                  <span ng-if="hasStatuses(pull)">
                      <span ng-if="isLastStatus(pull, 'success')" title="Last test succeeded" class="good glyphicon glyphicon-ok"></span>
                      <span ng-if="isLastStatus(pull, 'failure')" title="Last test failed!" class="bad glyphicon glyphicon-remove"></span>
