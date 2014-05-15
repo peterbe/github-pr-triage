@@ -196,9 +196,21 @@ angular.module('triage.controllers', [])
         return pull._comments && pull._comments.length || 0;
     };
 
-    $scope.isMergeable = function(pull) {
-        return !!pull.merge_commit_sha;
-    };
+    function loadMergeableStatus(pull, callback) {
+        $http
+        .get('/githubproxy/' + pull.url)
+        .success(function(data) {
+            if (data._ratelimit_limit) {
+                ratelimit.update(data._ratelimit_limit, data._ratelimit_remaining);
+            }
+            pull._is_mergeable =  data.mergeable;
+        }).error(function(data, status) {
+            console.warn(data, status);
+        })
+        .finally(function() {
+            if (callback) callback();
+        });
+    }
 
     $scope.hasStatuses = function(pull) {
         return pull._statuses && pull._statuses.length;
@@ -317,10 +329,10 @@ angular.module('triage.controllers', [])
                 ratelimit.update(data._ratelimit_limit, data._ratelimit_remaining);
             }
             // To work out the increments for the nanobar, start with assuming
-            // this group has 3 things it needs to do per pull request
+            // this group has 4 things it needs to do per pull request
             var increment = null;
             if (data._data.length) {
-                increment = base_increment / (data._data.length * 3);
+                increment = base_increment / (data._data.length * 4);
             }
             _.each(data._data, function(pull) {
                 pull._bugs = findBugNumbers(pull.title);
@@ -335,6 +347,9 @@ angular.module('triage.controllers', [])
                         nanobarIncrement(increment);
                         loadCommits(pull, function() {
                             nanobarIncrement(increment);
+                            loadMergeableStatus(pull, function() {
+                                nanobarIncrement(increment);
+                            });
                         });
                     });
                 });
@@ -370,7 +385,7 @@ angular.module('triage.controllers', [])
 
     $scope.loading = true;
     $scope.groups = [];
-    // there are 4 requests we need to make per project
+    // there are 5 requests we need to make per project
     $scope.owners.forEach(function(owner, i) {
         var group = {
             owner: owner,

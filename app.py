@@ -47,70 +47,67 @@ class ProxyView(MethodView):
         key = self.prefix + hashlib.md5(path).hexdigest()
         short_key = 'short-' + key
         long_key = 'long-' + key
-        value = cache.get(short_key)
-        if value:
-            value = json.loads(value)
-        else:
-            # do we have it in long-term memory? If so, do conditional get
-            value = cache.get(long_key)
-            if value:
-                value = json.loads(value)
-                # but is it out of date?
-                # print "We have only a long-term storage of this"
-                if value.get('_etag'):
-                    headers = {'If-None-Match': value['_etag']}
-                    self._attach_auth(headers)
-                    # print path
-                    # print headers
-                    print "CONDITIONAL GET", self.base + path
-                    response = requests.get(self.base + path, headers=headers)
-                    if response.status_code == 304:
-                        # it's still fresh!
-                        cache.set(
-                            short_key,
-                            json.dumps(value),
-                            self.short_expires
-                        )
-                        value['_ratelimit_limit'] = (
-                            response.headers.get('X-RateLimit-Limit')
-                        )
-                        value['_ratelimit_remaining'] = (
-                            response.headers.get('X-RateLimit-Remaining')
-                        )
-                    else:
-                        value = None
-                else:
-                    # it's too old and we can't do a conditional get
-                    value = None
+        short_value, long_value = cache.get_many(*[short_key, long_key])
+        if short_value:
+            value = json.loads(short_value)
+        elif long_value:
+            value = json.loads(long_value)
 
-            if not value:
-                print "GET", self.base + path
-                headers = {}
+            if value.get('_etag'):
+                headers = {'If-None-Match': value['_etag']}
                 self._attach_auth(headers)
+                # print path
+                # print headers
+                print "CONDITIONAL GET", self.base + path
                 response = requests.get(self.base + path, headers=headers)
+                if response.status_code == 304:
+                    # it's still fresh!
+                    cache.set(
+                        short_key,
+                        json.dumps(value),
+                        self.short_expires
+                    )
+                    value['_ratelimit_limit'] = (
+                        response.headers.get('X-RateLimit-Limit')
+                    )
+                    value['_ratelimit_remaining'] = (
+                        response.headers.get('X-RateLimit-Remaining')
+                    )
+                else:
+                    value = None
+            else:
+                value = None
+        else:
+            value = None
 
-                assert response.status_code == 200, response.status_code
+        if not value:
+            print "GET", self.base + path
+            headers = {}
+            self._attach_auth(headers)
+            response = requests.get(self.base + path, headers=headers)
 
-                value = response.json()
-                if not isinstance(value, dict):
-                    # if the JSON response is a list or something we can't
-                    # attach extra stuff to it
-                    value = {'_data': value}
-                cache.set(short_key, json.dumps(value), self.short_expires)
+            assert response.status_code == 200, response.status_code
 
-                # we only need these for the long-storage stuff
-                value['_etag'] = response.headers.get('ETag')
-                cache.set(long_key, json.dumps(value), self.long_expires)
+            value = response.json()
+            if not isinstance(value, dict):
+                # if the JSON response is a list or something we can't
+                # attach extra stuff to it
+                value = {'_data': value}
+            cache.set(short_key, json.dumps(value), self.short_expires)
 
-                # these values aren't worth storing in the cache but
-                # useful to return as part of the response
-                value['_ratelimit_limit'] = (
-                    response.headers.get('X-RateLimit-Limit')
-                )
-                value['_ratelimit_remaining'] = (
-                    response.headers.get('X-RateLimit-Remaining')
-                )
+            # we only need these for the long-storage stuff
+            value['_etag'] = response.headers.get('ETag')
+            cache.set(long_key, json.dumps(value), self.long_expires)
 
+            # these values aren't worth storing in the cache but
+            # useful to return as part of the response
+            value['_ratelimit_limit'] = (
+                response.headers.get('X-RateLimit-Limit')
+            )
+            value['_ratelimit_remaining'] = (
+                response.headers.get('X-RateLimit-Remaining')
+            )
+            
         return make_response(jsonify(value))
 
 
