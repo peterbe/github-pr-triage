@@ -112,7 +112,7 @@ app.classy.controller({
     _startLoading: function() {
         this.$scope.loading = true;
         this.$scope.groups = [];
-        // there are 4 requests we need to make per project
+        // there are 5 requests we need to make per project
         this.$scope.owners.forEach(function(owner, i) {
             var group = {
                 owner: owner,
@@ -282,7 +282,7 @@ app.classy.controller({
         return pull._comments && pull._comments.length || 0;
     },
 
-    function loadMergeableStatus(pull, callback) {
+    loadMergeableStatus: function(pull, callback) {
         this.$http
         .get('/githubproxy/' + pull.url)
         .success(function(data) {
@@ -427,27 +427,18 @@ app.classy.controller({
                 pull._last_user_time = pull.created_at;
                 this.setLastActor(pull);
                 pulls.push(pull);
-<<<<<<< HEAD
                 this.loadComments(pull, function() {
                     this.nanobarIncrement(increment);
                     this.loadStatuses(pull, function() {
                         this.nanobarIncrement(increment);
                         this.loadCommits(pull, function() {
                             this.nanobarIncrement(increment);
-=======
-                loadComments(pull, function() {
-                    nanobarIncrement(increment);
-                    loadStatuses(pull, function() {
-                        nanobarIncrement(increment);
-                        loadCommits(pull, function() {
-                            nanobarIncrement(increment);
-                            loadMergeableStatus(pull, function() {
-                                nanobarIncrement(increment);
-                            });
->>>>>>> 3e4add1c91b04f548fd97540e5c6dbea47f9710e
-                        });
-                    });
-                });
+                            this.loadMergeableStatus(pull, function() {
+                                this.nanobarIncrement(increment);
+                            }.bind(this));
+                        }.bind(this));
+                    }.bind(this));
+                }.bind(this));
             }, this);
             group.pulls = pulls;
             this.$http
@@ -479,23 +470,5 @@ app.classy.controller({
         this.nanobar.go(Math.min(100, Math.ceil(this.nanobar_level)));
     }
 
-<<<<<<< HEAD
 })
-=======
-    $scope.loading = true;
-    $scope.groups = [];
-    // there are 5 requests we need to make per project
-    $scope.owners.forEach(function(owner, i) {
-        var group = {
-            owner: owner,
-            repo: $scope.repos[i],
-            loading: true,
-            pulls: []
-        };
-        loadPulls(group, 100 / $scope.owners.length);
-        $scope.groups.push(group);
-    });
-
-}])
->>>>>>> 3e4add1c91b04f548fd97540e5c6dbea47f9710e
 ;
