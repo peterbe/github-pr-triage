@@ -43,6 +43,9 @@ table.expanded td {
 .group {
     margin-bottom: 40px;
 }
+.group table.table {
+    margin-bottom: 5px;
+}
 
 a.closer {
     color: #999;
@@ -69,9 +72,13 @@ table.multiple th.assigned {
 }
 
 table.multiple th.state {
-    width: 46px;
+    width: 30px;
 }
 
+p.table-foot-note {
+    text-align: right;
+    font-size: 80%;
+}
 
 @font-face{
   font-family:'octicons';
@@ -97,6 +104,7 @@ table.multiple th.state {
 .octicon-check:before{content:'\f03a'}
 .octicon-check{color:green}
 .octicon-hourglass:before{content:'\f09e'}
+.octicon-question:before {content: '\f02c'}
 
 .blinking {
     -webkit-animation-name: blinker;

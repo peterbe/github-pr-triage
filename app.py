@@ -48,6 +48,7 @@ class ProxyView(MethodView):
         short_key = 'short-' + key
         long_key = 'long-' + key
         short_value, long_value = cache.get_many(*[short_key, long_key])
+
         if short_value:
             value = json.loads(short_value)
         elif long_value:
@@ -97,7 +98,12 @@ class ProxyView(MethodView):
 
             # we only need these for the long-storage stuff
             value['_etag'] = response.headers.get('ETag')
-            cache.set(long_key, json.dumps(value), self.long_expires)
+
+            # often when pulling down a pull request, the state of
+            # whether the pull request is mergeable takes a while to figure
+            # out so we don't want to cache that.
+            if value.get('mergeable_state') != 'unknown':
+                cache.set(long_key, json.dumps(value), self.long_expires)
 
             # these values aren't worth storing in the cache but
             # useful to return as part of the response
@@ -107,7 +113,7 @@ class ProxyView(MethodView):
             value['_ratelimit_remaining'] = (
                 response.headers.get('X-RateLimit-Remaining')
             )
-            
+
         return make_response(jsonify(value))
 
 

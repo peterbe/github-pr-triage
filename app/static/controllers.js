@@ -289,7 +289,8 @@ app.classy.controller({
             if (data._ratelimit_limit) {
                 this.ratelimit.update(data._ratelimit_limit, data._ratelimit_remaining);
             }
-            pull._is_mergeable =  data.mergeable;
+            pull._is_mergeable = data.mergeable;
+            pull._mergeable_state = data.mergeable_state;
         }.bind(this)).error(function(data, status) {
             console.warn(data, status);
         })
@@ -300,6 +301,10 @@ app.classy.controller({
 
     hasStatuses: function(pull) {
         return pull._statuses && pull._statuses.length;
+    },
+
+    hasMergeability: function(pull) {
+        return typeof pull._mergeable_state !== 'undefined';// && pull._mergeable_state !== 'unknown';
     },
 
     isLastStatus: function(pull, state) {
