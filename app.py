@@ -94,14 +94,16 @@ class ProxyView(MethodView):
                 # if the JSON response is a list or something we can't
                 # attach extra stuff to it
                 value = {'_data': value}
-            cache.set(short_key, json.dumps(value), self.short_expires)
+            # often when pulling down a pull request, the state of
+            # whether the pull request is mergeable takes a while to figure
+            # out so we don't want to cache that.
+            if value.get('mergeable_state') != 'unknown':
+                cache.set(short_key, json.dumps(value), self.short_expires)
 
             # we only need these for the long-storage stuff
             value['_etag'] = response.headers.get('ETag')
 
-            # often when pulling down a pull request, the state of
-            # whether the pull request is mergeable takes a while to figure
-            # out so we don't want to cache that.
+            # see comment about about possibly not caching based on mergeable_state
             if value.get('mergeable_state') != 'unknown':
                 cache.set(long_key, json.dumps(value), self.long_expires)
 
