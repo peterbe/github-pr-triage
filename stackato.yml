@@ -1,4 +1,6 @@
 name: github-pr-triage
+url:
+    - prs.paas.allizom.org
 framework:
     type: python
     runtime: python27
