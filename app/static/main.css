@@ -80,6 +80,13 @@ p.table-foot-note {
     font-size: 80%;
 }
 
+p.diff-stats {
+    font-weight: bold;
+    text-align: right;
+    font-size: 80%;
+    margin-right: 16px;
+}
+
 @font-face{
   font-family:'octicons';
   src:url("/static/fonts/octicons.eot");
@@ -105,6 +112,7 @@ p.table-foot-note {
 .octicon-check{color:green}
 .octicon-hourglass:before{content:'\f09e'}
 .octicon-question:before {content: '\f02c'}
+.octicon-diff:before {content: '\f04d' }
 
 .blinking {
     -webkit-animation-name: blinker;
