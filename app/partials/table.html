@@ -62,6 +62,12 @@
 
                  </a>
 
+                 <p ng-class="{hidden: !pull._expanded}" class="diff-stats">
+                     <span>Files changed: <a href="{{ pull.html_url }}/files" target="_blank">{{ pull._changed_files  | number:0 }}</a></span>
+                     <font color="#55A532">+{{ pull._additions  | number:0 }}</font> /
+                     <font color="#BD2C00">-{{ pull._deletions | number:0 }}</font>
+                 </p>
+
                  <table ng-class="{hidden: !pull._expanded}" class="expanded table table-condensed">
                      <tr ng-repeat="event in pull._events | orderBy:'_date':false">
                          <td>

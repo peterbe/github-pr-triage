@@ -282,7 +282,7 @@ app.classy.controller({
         return pull._comments && pull._comments.length || 0;
     },
 
-    loadMergeableStatus: function(pull, callback) {
+    loadPull: function(pull, callback) {
         this.$http
         .get('/githubproxy/' + pull.url)
         .success(function(data) {
@@ -291,6 +291,9 @@ app.classy.controller({
             }
             pull._is_mergeable = data.mergeable;
             pull._mergeable_state = data.mergeable_state;
+            pull._additions = data.additions;
+            pull._deletions = data.deletions;
+            pull._changed_files = data.changed_files;
         }.bind(this)).error(function(data, status) {
             console.warn(data, status);
         })
@@ -438,7 +441,7 @@ app.classy.controller({
                         this.nanobarIncrement(increment);
                         this.loadCommits(pull, function() {
                             this.nanobarIncrement(increment);
-                            this.loadMergeableStatus(pull, function() {
+                            this.loadPull(pull, function() {
                                 this.nanobarIncrement(increment);
                             }.bind(this));
                         }.bind(this));
