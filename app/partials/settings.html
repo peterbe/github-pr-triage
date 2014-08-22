@@ -1,0 +1,32 @@
+<div class="row">
+    <form role="form" class="col-md-6">
+      <h4>Columns to display</h4>
+        <div class="form-group" ng-show="!loading_settings">
+          <div class="col-sm-offset-2 col-sm-10">
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" ng-model="settings.bug_column">
+                Bug
+              </label>
+            </div>
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" ng-model="settings.assignee_column">
+                Assignee
+              </label>
+            </div>
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" ng-model="settings.changes_column">
+                Changes
+              </label>
+            </div>
+          </div>
+        </div>
+        <p ng-if="came_from">
+          Go back to <a href="{{ came_from }}">{{ came_from }}</a>
+        </p>
+
+    </form>
+
+</div>

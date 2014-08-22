@@ -28,9 +28,25 @@ function findBugNumbers(title) {
  }
 
 
+var DEFAULT_SETTINGS = {
+    bug_column: true,
+    assignee_column: true,
+    changes_column: false
+};
+
 /* Controllers */
 
-var app = angular.module('triage.controllers', ['classy']);
+var app = angular.module('triage.controllers', ['classy', 'LocalForageModule']);
+
+app.config(['$localForageProvider', function($localForageProvider){
+    $localForageProvider.config({
+        //driver      : 'localStorageWrapper', // if you want to force a driver
+        name        : 'githubprtriage', // name of the database and prefix for your data
+        //version     : 1.0, // version of the database, you shouldn't have to use this
+        //storeName   : 'keyvaluepairs', // name of the table
+        //description : 'some description'
+    });
+}]);
 
 app.classy.controller({
     name: 'AppController',
@@ -59,10 +75,45 @@ app.classy.controller({
 });
 
 app.classy.controller({
+    name: 'SettingsController',
+    inject: ['$scope', '$location', '$localForage', 'gobacker'],
+    init: function() {
+
+        this.$scope.settings = DEFAULT_SETTINGS;
+        this.$scope.loading_settings = true;
+        this.$localForage.getItem('settings')
+        .then(function(value) {
+            if (value !== null) {
+                this.$scope.settings = value;
+            }
+            this.$scope.loading_settings = false;
+        }.bind(this));
+        this.$scope.came_from = this.gobacker.get();
+    },
+    watch: {
+        '{object}settings': function(new_value) {
+            this.$localForage.setItem('settings', new_value);
+        }
+    }
+});
+
+app.classy.controller({
     name: 'PullsController',
-    inject: ['$scope', '$http', '$routeParams', '$location', 'ratelimit'],
+    inject: ['$scope', '$http', '$routeParams', '$location', 'ratelimit', '$localForage', 'gobacker'],
     init: function() {
         'use strict';
+
+        this.$localForage.getItem('settings')
+        .then(function(value) {
+            if (value !== null) {
+                this.$scope.settings = value;
+            } else {
+                this.$scope.settings = DEFAULT_SETTINGS;
+            }
+            this.$scope.use_assigned = this.$scope.settings.assignee_column;
+            this.$scope.use_bug = this.$scope.settings.bug_column;
+            this.$scope.use_changes = this.$scope.settings.changes_column;
+        }.bind(this));
 
         if (this.$routeParams.owner && this.$routeParams.repo) {
             // legacy case
@@ -95,8 +146,6 @@ app.classy.controller({
             this.$scope.owners = owners;
             this.$scope.repos = repos;
         }
-        this.$scope.use_assigned = this.$location.hash().indexOf('hide-assigned') === -1;
-        this.$scope.use_bug = this.$location.hash().indexOf('hide-bug') === -1;
 
         this.$scope.bugs = {};
 
@@ -194,25 +243,6 @@ app.classy.controller({
             pull._events = this.$scope.getEvents(pull);
         }
         pull._expanded = !pull._expanded;
-    },
-
-
-    hideAssigned: function() {
-        if (!this.$scope.use_bug) {
-            this.$location.hash('hide-bug,hide-assigned');
-        } else {
-            this.$location.hash('hide-assigned');
-        }
-        this.$scope.use_assigned = false;
-    },
-
-    hideBug: function() {
-        if (!this.$scope.use_assigned) {
-            this.$location.hash('hide-bug,hide-assigned');
-        } else {
-            this.$location.hash('hide-bug');
-        }
-        this.$scope.use_bug = false;
     },
 
     getEvents: function(pull) {
@@ -476,6 +506,10 @@ app.classy.controller({
         }
         this.nanobar_level += increment;
         this.nanobar.go(Math.min(100, Math.ceil(this.nanobar_level)));
+    },
+
+    rememberWhereFrom: function() {
+        this.gobacker.remember(this.$location.path());
     }
 
 })

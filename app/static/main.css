@@ -86,6 +86,9 @@ p.diff-stats {
     font-size: 80%;
     margin-right: 16px;
 }
+td.changes a {
+    color: black;
+}
 
 @font-face{
   font-family:'octicons';

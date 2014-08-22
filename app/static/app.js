@@ -9,6 +9,10 @@ angular.module('triage', [
     $locationProvider.html5Mode(true);
 
     $routeProvider
+    .when('/settings', {
+        templateUrl: "/partials/settings.html",
+        controller: 'SettingsController'
+    })
     // where we parse the wildcard to be split by ';' and look something
     // like this:
     //  owner1:projectA,projectB;owner2:projectC;etc.
@@ -43,5 +47,16 @@ angular.module('triage', [
     return service;
 })
 
+.factory('gobacker', function() {
+    var history = null;
+    var service = {};
+    service.remember = function(path) {
+        history = path;
+    };
+    service.get = function() {
+        return history;
+    };
+    return service;
+})
 
 ;

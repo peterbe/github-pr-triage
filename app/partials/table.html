@@ -30,18 +30,15 @@
       ng-class="{hidden: !group.pulls.length, multiple: groups.length!=1}">
      <thead>
      <tr>
-         <th ng-if="use_bug" class="bug">Bug
-             <a href="" ng-click="hideBug()" title="Click to remove this column" ng-if="!group.loading" class="closer">&times;</a>
-         </th>
+         <th ng-if="use_bug" class="bug">Bug</th>
          <th class="title">Title</th>
          <th class="last-updated">Last updated</th>
-         <th ng-if="use_assigned" class="assigned">Assignee
-             <a href="" ng-click="hideAssigned()" title="Click to remove this column" ng-if="!group.loading" class="closer">&times;</a>
-         </th>
+         <th ng-if="use_assigned" class="assigned">Assignee</th>
          <th class="people">People</th>
          <th class="last-actor">Last actor</th>
          <th class="state">M*</th>
          <th class="state">S*</th>
+         <th class="changes" ng-if="use_changes">Changes</th>
      </tr>
      </thead>
      <tbody>
@@ -125,6 +122,14 @@
                  <!-- <span ng-if="!hasStatuses(pull)" class="maybe octicon octicon-question" title="Don't know statuses yet"></span> -->
 
             </td>
+            <td ng-if="use_changes" class="changes">
+                <a href="{{ pull.html_url }}/files" target="_blank">
+                  <span class="octicon octicon-diff"> </span>
+                  {{ pull._changed_files | number:0 }}
+                </a>
+                <font color="#55A532">+{{ pull._additions  | number:0 }}</font> /
+                <font color="#BD2C00">-{{ pull._deletions | number:0 }}</font>
+            </td>
         </tr>
      </tbody>
     </table>
@@ -134,8 +139,11 @@
 </div>
 <p>
     <a href="" ng-click="show_add_form=true">Add another project to this page</a>
-    &nbsp;
+    &bull;
     <a href="/">Pick a different project</a>
+    &bull;
+    <a href="/settings" title="Like which columns to show" ng-click="rememberWhereFrom()">Change settings</a>
+
 </p>
 
 <form role="form" ng-class="{hidden: !show_add_form}" ng-submit="submitForm()">
