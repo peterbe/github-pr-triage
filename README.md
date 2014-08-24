@@ -1,6 +1,6 @@
-# Github PR Triage
+# GitHub PR Triage
 
-A dashboard of Github Pull Requests
+A dashboard of GitHub Pull Requests
 
 An example: [mozilla/socorro](https://prs.paas.allizom.org)
 
@@ -25,7 +25,7 @@ Ubuntu:
 ## Configure
 
 ### GitHub
-Generate a github oauth personal access token with `public_repo` scope using
+Generate a GitHub oauth personal access token with `public_repo` scope using
 [instructions here](https://help.github.com/articles/creating-an-access-token-for-command-line-use).
 
 ### Environment
