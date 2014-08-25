@@ -5,7 +5,7 @@ framework:
     type: python
     runtime: python27
 mem: 128M
-instances: 1
+instances: 2
 requirements:
     pypm:
         - python-memcached
