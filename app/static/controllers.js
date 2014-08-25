@@ -341,9 +341,13 @@ app.classy.controller({
     },
 
     isLastStatus: function(pull, state) {
-        var statuses = pull._statuses || [];
-        var last = statuses[0];  // confusing, I know
+        var last = this.$scope.lastStatus(pull);
         return last.state === state;
+    },
+
+    lastStatus: function(pull) {
+        var statuses = pull._statuses || [];
+        return statuses[0];  // confusing, I know
     },
 
     loadComments: function(pull, callback) {
