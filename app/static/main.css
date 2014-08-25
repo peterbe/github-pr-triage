@@ -40,6 +40,9 @@ table.expanded td {
     font-size: 80%;
 }
 
+.no-open-pulls {
+    font-style: italic;
+}
 .group {
     margin-bottom: 40px;
 }

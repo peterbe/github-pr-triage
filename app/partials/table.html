@@ -26,6 +26,11 @@
            >&times;</a>
     </h4>
 
+    <p class="no-open-pulls" ng-class="{hidden: group.pulls.length}">
+      {{ randomExcuse() }}<br>
+      No open pull requests found at the moment.
+    </p>
+
     <table class="table table-condensed table-bordered"
       ng-class="{hidden: !group.pulls.length, multiple: groups.length!=1}">
      <thead>
@@ -36,8 +41,8 @@
          <th ng-if="use_assigned" class="assigned">Assignee</th>
          <th class="people">People</th>
          <th class="last-actor">Last actor</th>
-         <th class="state">M*</th>
-         <th class="state">S*</th>
+         <th class="state" title="Indicates whether it's currently mergeable">M*</th>
+         <th class="state" title="Indicates its status">S*</th>
          <th class="changes" ng-if="use_changes">Changes</th>
      </tr>
      </thead>
@@ -133,7 +138,7 @@
         </tr>
      </tbody>
     </table>
-    <p class="table-foot-note">
+    <p class="table-foot-note" ng-class="{hidden: !group.pulls.length}">
       <b>M*</b> means <b>Mergeable</b> and <b>S*</b> means <b>Status</b>
     </p>
 </div>

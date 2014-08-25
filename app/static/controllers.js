@@ -479,18 +479,20 @@ app.classy.controller({
                 }.bind(this));
             }, this);
             group.pulls = pulls;
-            this.$http
-            .get('/bugzillaproxy/bug?id=' + bugs.join(',') + '&include_fields=summary,id,status,resolution,is_open')
-            .success(function(data, status) {
-                var bugs = {};
-                _.each(data.bugs, function(bug) {
-                    bugs[bug.id] = bug;
+            if (bugs.length) {
+                this.$http
+                .get('/bugzillaproxy/bug?id=' + bugs.join(',') + '&include_fields=summary,id,status,resolution,is_open')
+                .success(function(data, status) {
+                    var bugs = {};
+                    _.each(data.bugs, function(bug) {
+                        bugs[bug.id] = bug;
+                    });
+                    this.$scope.bugs = bugs;
+                }.bind(this))
+                .error(function(data, status) {
+                    console.warn(data, status);
                 });
-                this.$scope.bugs = bugs;
-            }.bind(this))
-            .error(function(data, status) {
-                console.warn(data, status);
-            });
+            }
         }.bind(this))
         .error(function(data, status) {
         })
@@ -510,6 +512,16 @@ app.classy.controller({
 
     rememberWhereFrom: function() {
         this.gobacker.remember(this.$location.path());
+    },
+
+    randomExcuse: function() {
+        var excuses = [
+            "It's not you. It's me!",
+            "I think we should start seeing other people.",
+            "I've just been so conflicted recently.",
+            "I'm sorry. It's just not happening for me."
+        ];
+        return excuses[Math.floor(Math.random() * excuses.length)];
     }
 
 })
