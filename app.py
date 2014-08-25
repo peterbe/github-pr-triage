@@ -48,7 +48,6 @@ class ProxyView(MethodView):
         short_key = 'short-' + key
         long_key = 'long-' + key
         short_value, long_value = cache.get_many(*[short_key, long_key])
-
         if short_value:
             value = json.loads(short_value)
         elif long_value:

@@ -73,9 +73,11 @@ table.multiple th.people {
 table.multiple th.assigned {
     width: 88px;
 }
-
 table.multiple th.state {
     width: 30px;
+}
+table.multiple th.changes {
+    width: 160px;
 }
 
 p.table-foot-note {
