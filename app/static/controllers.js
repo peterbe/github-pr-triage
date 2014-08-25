@@ -512,16 +512,6 @@ app.classy.controller({
 
     rememberWhereFrom: function() {
         this.gobacker.remember(this.$location.path());
-    },
-
-    randomExcuse: function() {
-        var excuses = [
-            "It's not you. It's me!",
-            "I think we should start seeing other people.",
-            "I've just been so conflicted recently.",
-            "I'm sorry. It's just not happening for me."
-        ];
-        return excuses[Math.floor(Math.random() * excuses.length)];
     }
 
 })
