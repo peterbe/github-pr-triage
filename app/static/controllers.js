@@ -31,7 +31,8 @@ function findBugNumbers(title) {
 var DEFAULT_SETTINGS = {
     bug_column: true,
     assignee_column: true,
-    changes_column: false
+    changes_column: false,
+    labels_column: false
 };
 
 /* Controllers */
@@ -113,6 +114,7 @@ app.classy.controller({
             this.$scope.use_assigned = this.$scope.settings.assignee_column;
             this.$scope.use_bug = this.$scope.settings.bug_column;
             this.$scope.use_changes = this.$scope.settings.changes_column;
+            this.$scope.use_labels = this.$scope.settings.labels_column;
         }.bind(this));
 
         if (this.$routeParams.owner && this.$routeParams.repo) {
@@ -409,6 +411,23 @@ app.classy.controller({
         });
     },
 
+    loadLabels: function(pull, callback) {
+        this.$http
+        .get('/githubproxy/' + pull.issue_url)
+        .success(function(data) {
+            if (data._ratelimit_limit) {
+                this.ratelimit.update(data._ratelimit_limit, data._ratelimit_remaining);
+            }
+            pull._labels = data.labels;
+        }.bind(this))
+        .error(function(data, status) {
+            console.warn(data, status);
+        })
+        .finally(function() {
+            if (callback) callback();
+        });
+    },
+
     setLastActor: function(pull) {
         if (pull._last_commit && pull._last_comment) {
             // but who was first?!
@@ -457,12 +476,13 @@ app.classy.controller({
                 this.ratelimit.update(data._ratelimit_limit, data._ratelimit_remaining);
             }
             // To work out the increments for the nanobar, start with assuming
-            // this group has 4 things it needs to do per pull request
+            // this group has 5 things it needs to do per pull request
             var increment = null;
             if (data._data.length) {
-                increment = base_increment / (data._data.length * 4);
+                increment = base_increment / (data._data.length * 5);
             }
             data._data.forEach(function(pull) {
+                //console.warn(pull);
                 pull._bugs = findBugNumbers(pull.title);
                 bugs = _.union(bugs, pull._bugs);
                 pull._last_user = pull.user;
@@ -477,6 +497,9 @@ app.classy.controller({
                             this.nanobarIncrement(increment);
                             this.loadPull(pull, function() {
                                 this.nanobarIncrement(increment);
+                                this.loadLabels(pull, function() {
+                                    this.nanobarIncrement(increment);
+                                }.bind(this));
                             }.bind(this));
                         }.bind(this));
                     }.bind(this));

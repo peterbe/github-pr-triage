@@ -43,6 +43,7 @@
          <th class="state" title="Indicates whether it's currently mergeable">M*</th>
          <th class="state" title="Indicates its status">S*</th>
          <th class="changes" ng-if="use_changes">Changes</th>
+         <th class="labels" ng-if="use_labels">Labels</th>
      </tr>
      </thead>
      <tbody>
@@ -133,6 +134,11 @@
                 </a>
                 <font color="#55A532">+{{ pull._additions  | number:0 }}</font> /
                 <font color="#BD2C00">-{{ pull._deletions | number:0 }}</font>
+            </td>
+            <td ng-if="use_labels" class="labels">
+                <strong ng-repeat="label in pull._labels | orderBy:'name':false" style="background-color: #{{ label.color }}">
+                    {{ label.name }}
+                </strong>
             </td>
         </tr>
      </tbody>
