@@ -188,6 +188,12 @@ app.classy.controller({
     },
 
     _getUserRepos: function(username, callback) {
+        // See https://github.com/peterbe/github-pr-triage/issues/23
+        var filter_event_types = [
+            'PullRequestReviewCommentEvent',
+            'PullRequestEvent',
+            'IssueCommentEvent',
+        ];
         this.$http
         .get('/githubproxy/users/' + username + '/events')
         .success(function(data) {
@@ -195,7 +201,20 @@ app.classy.controller({
             var events = data._data;
             var repos_set = {};
             events.forEach(function(item, i) {
-                repos_set[item.repo.name] = 1;
+                if (filter_event_types.indexOf(item.type) > -1) {
+                    if (item.type === 'IssueCommentEvent') {
+                        // To GitHub a pull request is an issue.
+                        // If you make a general comment on a PR it's the same
+                        // as if you had made a comment on an issue.
+                        // The only way to distinguish these two is to look at
+                        // the html_url :(
+                        if (item.payload.comment.html_url.indexOf('/issues/') > -1) {
+                            // then it's just an issue comment on a regular issue
+                            return;
+                        }
+                    }
+                    repos_set[item.repo.name] = 1;
+                }
             });
             var owners = [];
             var repos = [];
