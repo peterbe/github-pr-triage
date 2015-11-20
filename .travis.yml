@@ -5,3 +5,10 @@ before_install:
 - pip install -r requirements.txt
 - pip install nose
 script: nosetests
+deploy:
+  provider: heroku
+  api_key:
+    secure: P1v9CEHjkERq5AFedg3CDXYoZXtDMLRxcCS9D9nuo/9/ujToH0ApYRmYnsA3rZdArHUptiITlR6DS72BK0GgshSHdQIkBRFvVa7WbyIkj86wRYQFkb13csEhoTrfPoYqjMxEqgGMsuKOWW1QW0WqTPnk2+4Vax6MbIWJlfivATo=
+  app: enigmatic-beyond-2991
+  on:
+    repo: peterbe/github-pr-triage
