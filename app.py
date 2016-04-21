@@ -7,7 +7,7 @@ import requests
 
 from werkzeug.contrib.cache import MemcachedCache
 
-from flask import Flask, request, make_response, jsonify, send_file
+from flask import Flask, request, make_response, jsonify, send_file, abort
 from flask.views import MethodView
 
 
@@ -192,8 +192,9 @@ def catch_all(path):
     if path == 'favicon.ico':
         path = 'static/favicon.ico'
     path = path or 'index.html'
+    if '../' in path:  # trying to traverse up
+        abort(404)
     path = os.path.join(APP_LOCATION, path)
-    # print "PATH", path
 
     if not (os.path.isdir(path) or os.path.isfile(path)):
         path = os.path.join(APP_LOCATION, 'index.html')
