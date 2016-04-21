@@ -7,7 +7,7 @@ grymt==1.4
 cffi==1.6.0
 itsdangerous==0.24
 jsmin==2.1.6
-pylibmc==1.5.0
+pylibmc==1.5.1
 python-memcached==1.57
 requests==2.9.1
 wsgiref==0.1.2
