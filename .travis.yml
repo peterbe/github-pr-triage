@@ -4,6 +4,9 @@ python:
 before_install:
 - pip install -r requirements.txt
 - pip install nose
+branches:
+  only:
+  - master
 script: nosetests
 deploy:
   provider: heroku
