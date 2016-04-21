@@ -14,7 +14,7 @@ wsgiref==0.1.2
 Flask-Cache==0.13.1
 Flask-Heroku-Cacheify==1.5
 Flask-SSLify==0.1.5
-gunicorn==19.3.0
+gunicorn==19.4.5
 whitenoise==2.0.6
 ndg-httpsclient==0.4.0
 pyOpenSSL==16.0.0
