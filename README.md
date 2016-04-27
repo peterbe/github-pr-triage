@@ -2,7 +2,7 @@
 
 A dashboard of GitHub Pull Requests
 
-An example: [mozilla/socorro](https://prs.paas.allizom.org)
+An example: [mozilla/socorro](https://prs.mozilla.io/mozilla/socorro)
 
 License: [MPL2](http://www.mozilla.org/MPL/2.0/)
 
