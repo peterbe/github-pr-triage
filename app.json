@@ -1,0 +1,26 @@
+{
+  "name": "github-pr-triage",
+  "scripts": {
+  },
+  "env": {
+    "GITHUB_OAUTH_TOKEN": {
+      "required": true
+    },
+    "WEB_CONCURRENCY": {
+      "required": true
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1
+    }
+  },
+  "addons": [
+    "newrelic"
+  ],
+  "buildpacks": [
+    {
+      "url": "heroku/python"
+    }
+  ]
+}
