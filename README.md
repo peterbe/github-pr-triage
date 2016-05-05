@@ -6,6 +6,7 @@ An example: [mozilla/socorro](https://prs.mozilla.io/mozilla/socorro)
 
 License: [MPL2](http://www.mozilla.org/MPL/2.0/)
 
+[![Build Status](https://travis-ci.org/peterbe/github-pr-triage.svg?branch=master)](https://travis-ci.org/peterbe/github-pr-triage)
 
 ## Install
 
