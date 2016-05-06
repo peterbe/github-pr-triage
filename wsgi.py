@@ -7,7 +7,7 @@ from whitenoise import WhiteNoise
 from app import app
 
 
-SSLify(app, permanent=True)
+# SSLify(app, permanent=True)
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 wn_app = WhiteNoise(app.wsgi_app, root=os.path.join(APP_ROOT, 'static'), prefix='/static')
 wn_app.add_files(root=os.path.join(APP_ROOT, 'root_files'), prefix='')
