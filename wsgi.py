@@ -4,7 +4,11 @@ from flask_sslify import SSLify
 from werkzeug.contrib.fixers import ProxyFix
 from whitenoise import WhiteNoise
 
-from app import app
+from app import app, DEBUG
+
+if DEBUG:
+    print "Please don't do this in production"
+    app.debug = DEBUG
 
 
 # SSLify(app, permanent=True)
