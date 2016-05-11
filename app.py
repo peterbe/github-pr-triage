@@ -5,9 +5,8 @@ import hashlib
 
 import requests
 
-from werkzeug.contrib.cache import MemcachedCache
-
 from flask import Flask, request, make_response, jsonify, send_file, abort
+from flask.ext.cacheify import init_cacheify
 from flask.views import MethodView
 
 
@@ -25,7 +24,7 @@ app = Flask(
     __name__,
     static_folder=os.path.join(APP_LOCATION, 'static')
 )
-cache = MemcachedCache(MEMCACHE_URL)
+cache = init_cacheify(app)
 
 
 class ProxyView(MethodView):
