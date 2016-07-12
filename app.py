@@ -25,6 +25,8 @@ app = Flask(
     static_folder=os.path.join(APP_LOCATION, 'static')
 )
 cache = init_cacheify(app)
+print "Type of cache configured", type(cache.cache)
+print "Cache config", cache.config
 
 
 class ProxyView(MethodView):
@@ -50,9 +52,9 @@ class ProxyView(MethodView):
 
         # temporarily debugging the caching
         if short_value or long_value:
-            print "CACHE HIT", path
+            print "*** CACHE HIT", path
         else:
-            print "CACHE MISS", path
+            print "*** CACHE MISS", path
 
         if short_value:
             value = json.loads(short_value)
