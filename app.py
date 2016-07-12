@@ -26,6 +26,9 @@ app = Flask(
 )
 cache = init_cacheify(app)
 
+cache.set('cache', 'works :)', 10)
+print 'Cache', cache.get('cache') or "doesn't work :("
+
 
 class ProxyView(MethodView):
 
