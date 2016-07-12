@@ -26,9 +26,6 @@ app = Flask(
 )
 cache = init_cacheify(app)
 
-cache.set('cache', 'works :)', 10)
-print 'Cache', cache.get('cache') or "doesn't work :("
-
 
 class ProxyView(MethodView):
 
@@ -50,6 +47,13 @@ class ProxyView(MethodView):
         short_key = 'short-' + key
         long_key = 'long-' + key
         short_value, long_value = cache.get_many(*[short_key, long_key])
+
+        # temporarily debugging the caching
+        if short_value or long_value:
+            print "CACHE HIT", path
+        else:
+            print "CACHE MISS", path
+
         if short_value:
             value = json.loads(short_value)
         elif long_value:
