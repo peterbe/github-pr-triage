@@ -10,7 +10,7 @@ from flask.ext.cacheify import init_cacheify
 from flask.views import MethodView
 
 
-MEMCACHE_URL = os.environ.get('MEMCACHE_URL', '127.0.0.1:11211').split(',')
+# MEMCACHE_URL = os.environ.get('MEMCACHE_URL', '127.0.0.1:11211').split(',')
 DEBUG = os.environ.get('DEBUG', False) in ('true', '1', 'y', 'yes')
 GITHUB_OAUTH_TOKEN = os.environ.get('GITHUB_OAUTH_TOKEN')
 
@@ -49,12 +49,6 @@ class ProxyView(MethodView):
         short_key = 'short-' + key
         long_key = 'long-' + key
         short_value, long_value = cache.get_many(*[short_key, long_key])
-
-        # temporarily debugging the caching
-        if short_value or long_value:
-            print "*** CACHE HIT", path
-        else:
-            print "*** CACHE MISS", path
 
         if short_value:
             value = json.loads(short_value)
