@@ -37,7 +37,8 @@
          <th ng-if="use_bug" class="bug">Bug</th>
          <th class="title">Title</th>
          <th class="last-updated">Last updated</th>
-         <th ng-if="use_assigned" class="assigned">Assignee</th>
+         <th ng-if="use_assigned" class="assigned">Assignees</th>
+         <th ng-if="use_reviewer" class="reviewer">Reviewers</th>
          <th class="people">People</th>
          <th class="last-actor">Last actor</th>
          <th class="state" title="Indicates whether it's currently mergeable">M*</th>
@@ -89,11 +90,16 @@
              </td>
              <td><time am-time-ago="pull.updated_at"></time>
              </td>
-            <td ng-if="use_assigned">
-                 <a ng-if="pull.assignee" href="{{ pull.assignee.html_url }}" target="_blank" title="{{ pull.assignee.login }}">
-                    <img ng-src="{{ pull.assignee.avatar_url }}" class="avatar" alt="{{ pull.assignee.login }}">
+             <td ng-if="use_assigned">
+                 <a ng-repeat="user in pull.assignees" href="{{ user.html_url }}" target="_blank" title="{{ user.login }}">
+                    <img ng-src="{{ user.avatar_url }}" class="avatar" alt="{{ user.login }}">
                  </a>
-            </td>
+             </td>
+             <td ng-if="use_reviewer">
+                <a ng-repeat="user in pull.requested_reviewers" href="{{ user.html_url }}" target="_blank" title="{{ user.login }}">
+                   <img ng-src="{{ user.avatar_url }}" class="avatar" alt="{{ user.login }}">
+                </a>
+             </td>
              <td>
                  <a ng-repeat="user in uniqueUsers(pull)"
                     href="{{ user.html_url }}" target="_blank" title="{{ user.login }}">

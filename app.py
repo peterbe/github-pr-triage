@@ -32,7 +32,7 @@ print "Cache config", cache.config
 class ProxyView(MethodView):
 
     # when we serve straight from memcache
-    short_expires = 60 * 5  * (1 + 3 * int(DEBUG))
+    short_expires = 60 * 5 * (1 + 3 * int(DEBUG))
     # store long term
     long_expires = 60 * 60 * 24
 
@@ -84,7 +84,9 @@ class ProxyView(MethodView):
 
         if not value:
             print "GET", self.base + path
-            headers = {}
+            headers = {
+                'Accept': 'application/vnd.github.black-cat-preview+json',
+            }
             self._attach_auth(headers)
             response = requests.get(self.base + path, headers=headers)
 

@@ -31,6 +31,7 @@ function findBugNumbers(title) {
 var DEFAULT_SETTINGS = {
     bug_column: true,
     assignee_column: true,
+    reviewer_column: false,
     changes_column: false,
     labels_column: false
 };
@@ -112,6 +113,7 @@ app.classy.controller({
                 this.$scope.settings = DEFAULT_SETTINGS;
             }
             this.$scope.use_assigned = this.$scope.settings.assignee_column;
+            this.$scope.use_reviewer = this.$scope.settings.reviewer_column;
             this.$scope.use_bug = this.$scope.settings.bug_column;
             this.$scope.use_changes = this.$scope.settings.changes_column;
             this.$scope.use_labels = this.$scope.settings.labels_column;
@@ -447,6 +449,23 @@ app.classy.controller({
         });
     },
 
+    loadRequestedReviewers: function(pull, callback) {
+        this.$http
+        .get('/githubproxy/' + pull.url + '/requested_reviewers')
+        .success(function(data) {
+            if (data._ratelimit_limit) {
+                this.ratelimit.update(data._ratelimit_limit, data._ratelimit_remaining);
+            }
+            pull.requested_reviewers = data._data;
+        }.bind(this))
+        .error(function(data, status) {
+            console.warn(data, status);
+        })
+        .finally(function() {
+            if (callback) callback();
+        });
+    },
+
     setLastActor: function(pull) {
         if (pull._last_commit && pull._last_comment) {
             // but who was first?!
@@ -518,6 +537,11 @@ app.classy.controller({
                                 this.nanobarIncrement(increment);
                                 this.loadLabels(pull, function() {
                                     this.nanobarIncrement(increment);
+                                    if (this.$scope.use_reviewer) {
+                                        this.loadRequestedReviewers(pull, function() {
+                                            this.nanobarIncrement(increment);
+                                        });
+                                    }
                                 }.bind(this));
                             }.bind(this));
                         }.bind(this));
