@@ -1,0 +1,4 @@
+* Enable Whitenoise to handle static assets (e.g. gzip!)
+  http://stackoverflow.com/a/30354337/205832
+
+* Rewrite everything in Preact
