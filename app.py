@@ -24,6 +24,9 @@ app = Flask(
     __name__,
     static_folder=os.path.join(APP_LOCATION, 'static')
 )
+if not DEBUG:
+    app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 3600 * 24 * 14  # 14 days
+
 cache = init_cacheify(app)
 print "Type of cache configured", type(cache.cache)
 print "Cache config", cache.config
