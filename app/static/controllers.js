@@ -38,17 +38,7 @@ var DEFAULT_SETTINGS = {
 
 /* Controllers */
 
-var app = angular.module('triage.controllers', ['classy', 'LocalForageModule']);
-
-app.config(['$localForageProvider', function($localForageProvider){
-    $localForageProvider.config({
-        //driver      : 'localStorageWrapper', // if you want to force a driver
-        name        : 'githubprtriage', // name of the database and prefix for your data
-        //version     : 1.0, // version of the database, you shouldn't have to use this
-        //storeName   : 'keyvaluepairs', // name of the table
-        //description : 'some description'
-    });
-}]);
+var app = angular.module('triage.controllers', ['classy']);
 
 app.classy.controller({
     name: 'AppController',
@@ -78,46 +68,40 @@ app.classy.controller({
 
 app.classy.controller({
     name: 'SettingsController',
-    inject: ['$scope', '$location', '$localForage', 'gobacker'],
+    inject: ['$scope', '$location', 'gobacker'],
     init: function() {
 
         this.$scope.settings = DEFAULT_SETTINGS;
-        this.$scope.loading_settings = true;
-        this.$localForage.getItem('settings')
-        .then(function(value) {
-            if (value !== null) {
-                this.$scope.settings = value;
-            }
-            this.$scope.loading_settings = false;
-        }.bind(this));
+        var settings = localStorage.getItem('settings');
+        if (settings) {
+            this.$scope.settings = JSON.parse(settings);
+        }
         this.$scope.came_from = this.gobacker.get();
     },
     watch: {
         '{object}settings': function(new_value) {
-            this.$localForage.setItem('settings', new_value);
+            localStorage.setItem('settings', JSON.stringify(new_value));
         }
     }
 });
 
 app.classy.controller({
     name: 'PullsController',
-    inject: ['$scope', '$http', '$routeParams', '$location', 'ratelimit', '$localForage', 'gobacker'],
+    inject: ['$scope', '$http', '$routeParams', '$location', 'ratelimit', 'gobacker'],
     init: function() {
         'use strict';
 
-        this.$localForage.getItem('settings')
-        .then(function(value) {
-            if (value !== null) {
-                this.$scope.settings = value;
-            } else {
-                this.$scope.settings = DEFAULT_SETTINGS;
-            }
-            this.$scope.use_assigned = this.$scope.settings.assignee_column;
-            this.$scope.use_reviewer = this.$scope.settings.reviewer_column;
-            this.$scope.use_bug = this.$scope.settings.bug_column;
-            this.$scope.use_changes = this.$scope.settings.changes_column;
-            this.$scope.use_labels = this.$scope.settings.labels_column;
-        }.bind(this));
+        var settings = localStorage.getItem('settings');
+        if (settings) {
+            this.$scope.settings = JSON.parse(settings);
+        } else {
+            this.$scope.settings = DEFAULT_SETTINGS;
+        }
+        this.$scope.use_assigned = this.$scope.settings.assignee_column;
+        this.$scope.use_reviewer = this.$scope.settings.reviewer_column;
+        this.$scope.use_bug = this.$scope.settings.bug_column;
+        this.$scope.use_changes = this.$scope.settings.changes_column;
+        this.$scope.use_labels = this.$scope.settings.labels_column;
 
         if (this.$routeParams.owner && this.$routeParams.repo) {
             // legacy case
@@ -199,7 +183,6 @@ app.classy.controller({
         this.$http
         .get('/githubproxy/users/' + username + '/events')
         .success(function(data) {
-            // console.log("DATA", data._data);
             var events = data._data;
             var repos_set = {};
             events.forEach(function(item, i) {

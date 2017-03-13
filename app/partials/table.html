@@ -91,20 +91,22 @@
              <td><time am-time-ago="pull.updated_at"></time>
              </td>
              <td ng-if="use_assigned">
-                 <a ng-repeat="user in pull.assignees" href="{{ user.html_url }}" target="_blank" title="{{ user.login }}">
-                    <img ng-src="{{ user.avatar_url }}" class="avatar" alt="{{ user.login }}">
-                 </a>
+                 <a ng-repeat="user in pull.assignees"
+                    href="{{ user.html_url }}"
+                    target="_blank"
+                    title="{{ user.login }}"><img ng-src="{{ user.avatar_url }}" class="avatar" alt="{{ user.login }}"></a>
              </td>
              <td ng-if="use_reviewer">
-                <a ng-repeat="user in pull.requested_reviewers" href="{{ user.html_url }}" target="_blank" title="{{ user.login }}">
-                   <img ng-src="{{ user.avatar_url }}" class="avatar" alt="{{ user.login }}">
-                </a>
+                 <a ng-repeat="user in pull.requested_reviewers"
+                    href="{{ user.html_url }}"
+                    target="_blank"
+                    title="{{ user.login }}"><img ng-src="{{ user.avatar_url }}" class="avatar" alt="{{ user.login }}"></a>
              </td>
              <td>
                  <a ng-repeat="user in uniqueUsers(pull)"
-                    href="{{ user.html_url }}" target="_blank" title="{{ user.login }}">
-                     <img class="avatar" ng-src="{{ user.avatar_url}}" alt="{{ user.login }}">
-                 </a>
+                    href="{{ user.html_url }}"
+                    target="_blank"
+                    title="{{ user.login }}"><img class="avatar" ng-src="{{ user.avatar_url}}" alt="{{ user.login }}"></a>
             </td>
             <td>
                     <a href="{{ pull._last_actor.user.html_url }}"><img ng-src="{{ pull._last_actor.user.avatar_url }}" class="avatar" alt="{{ pull._last_actor.user.avatar_url }}"></a>

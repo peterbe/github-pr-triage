@@ -4,7 +4,10 @@
     padding: 100px;
     color: red;
 }
-td a { padding-right: 5px; }
+td a img.avatar {
+    margin-right: 2px;
+    margin-bottom: 2px;
+}
 .cloak {
    padding: 10px;
    height: 100%;
@@ -13,7 +16,7 @@ td a { padding-right: 5px; }
 .cloak p { text-align:center; }
 a.resolved { text-decoration: line-through !important; }
 img.avatar {
-    border-radius: 4px;
+    border-radius: 3px;
     width: 24px;
     height: 24px;
 }
