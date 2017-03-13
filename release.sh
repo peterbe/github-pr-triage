@@ -2,5 +2,5 @@
 
 set -e
 
-grymt -v ./app
+grymt -w ./app
 git push heroku master
