@@ -6,7 +6,7 @@ import hashlib
 import requests
 
 from flask import Flask, request, make_response, jsonify, send_file, abort
-from flask.ext.cacheify import init_cacheify
+from flask_caching import Cache
 from flask.views import MethodView
 
 
@@ -16,7 +16,7 @@ GITHUB_OAUTH_TOKEN = os.environ.get('GITHUB_OAUTH_TOKEN')
 
 APP_LOCATION = 'app'
 if os.path.isdir('./dist') and os.listdir('./dist'):
-    print "Note: Serving files from ./dist"
+    print("Note: Serving files from ./dist")
     APP_LOCATION = 'dist'
 
 
@@ -27,9 +27,9 @@ app = Flask(
 if not DEBUG:
     app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 3600 * 24 * 14  # 14 days
 
-cache = init_cacheify(app)
-print "Type of cache configured", type(cache.cache)
-print "Cache config", cache.config
+cache = Cache(app, config={'CACHE_TYPE': 'simple'})
+# print("Type of cache configured", type(cache.cache))
+# print("Cache config", cache.config)
 
 
 class ProxyView(MethodView):
@@ -48,7 +48,7 @@ class ProxyView(MethodView):
             assert path.startswith(self.base)
             path = path.replace(self.base, '')
         path = '%s?%s' % (path, request.query_string)
-        key = self.prefix + hashlib.md5(path).hexdigest()
+        key = self.prefix + hashlib.md5(path.encode('utf-8')).hexdigest()
         short_key = 'short-' + key
         long_key = 'long-' + key
         short_value, long_value = cache.get_many(*[short_key, long_key])
@@ -61,9 +61,7 @@ class ProxyView(MethodView):
             if value.get('_etag'):
                 headers = {'If-None-Match': value['_etag']}
                 self._attach_auth(headers)
-                # print path
-                # print headers
-                print "CONDITIONAL GET", self.base + path
+                print("CONDITIONAL GET", self.base + path)
                 response = requests.get(self.base + path, headers=headers)
                 if response.status_code == 304:
                     # it's still fresh!
@@ -86,7 +84,7 @@ class ProxyView(MethodView):
             value = None
 
         if not value:
-            print "GET", self.base + path
+            print("GET", self.base + path)
             headers = {
                 'Accept': 'application/vnd.github.black-cat-preview+json',
             }
@@ -140,17 +138,12 @@ class BugzillaProxyView(ProxyView):
 class Webhook(MethodView):
 
     def post(self):
-        # print "Incoming webhook"
         payload = json.loads(request.form['payload'])
-        # from pprint import pprint
-        # pprint(payload)
         paths = []
         if payload.get('action') == 'opened' and payload.get('repository'):
             repo_full_name = payload['repository']['full_name']
-            # print "FULL_NAME", repr(repo_full_name)
             paths.append('repos/%s/pulls?state=open' % repo_full_name)
         elif payload.get('action') == 'synchronize' and payload.get('pull_request'):
-            # repo_full_name = payload['repository']['full_name']
             commits_url = payload.get('pull_request').get('commits_url')
             path = commits_url.replace(GithubProxyView.base, '')
             paths.append(path)
@@ -171,7 +164,7 @@ class Webhook(MethodView):
             cache_key = self._path_to_cache_key(path)
             # print "CACHE_KEY", cache_key
             if cache.get(cache_key):
-                print "\tDELETED", cache_key, 'FOR', path
+                print("\tDELETED", cache_key, 'FOR', path)
                 cache.delete(cache_key)
 
         if not paths:
