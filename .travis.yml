@@ -9,10 +9,3 @@ branches:
   only:
   - master
 script: nosetests
-deploy:
-  provider: heroku
-  api_key:
-    secure: GNkiuO2zKFp7WMAejJJE3mx+onXnsQ9RZa67sKhzKgpithJTDYSD+ne7Rkr5wvl56IWUJM2tuzDYpnLjJNQB5ZYpcLMDPNHm+g7soA/A0nIoOXSST66quGaGlJRVZyuQRXiOchQNWCceg+n5uKievmOhZM7xX6x0Qnj6+Q0sA3g=
-  app: pr-triage
-  on:
-    repo: peterbe/github-pr-triage
